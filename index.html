@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>校園植物地圖 · Campus Plant Map</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1D9E75">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="植物地圖">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<style>
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g50:#E1F5EE;--g100:#9FE1CB;--g200:#5DCAA5;--g400:#1D9E75;--g600:#0F6E56;--g800:#085041;
+  --a50:#FAEEDA;--a400:#BA7517;--a800:#633806;
+  --r50:#FCEBEB;--r400:#E24B4A;--r800:#501313;
+  --b50:#E6F1FB;--b400:#378ADD;--b800:#042C53;
+  --y50:#FFFBEB;--y400:#F59E0B;--y800:#78350F;
+  --bg:#fff;--bg2:#F7F7F5;--bg3:#EDEDEA;
+  --tx:#1a1a18;--tx2:#5F5E5A;--tx3:#888780;
+  --bd:rgba(0,0,0,0.1);--bd2:rgba(0,0,0,0.18);
+  --sh:0 2px 12px rgba(0,0,0,0.07);
+  --fn:-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --r:8px;--rl:12px;--rxl:16px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1C1C1A;--bg2:#242422;--bg3:#2E2E2C;
+  --tx:#F0EFE8;--tx2:#A8A79F;--tx3:#6B6A64;
+  --bd:rgba(255,255,255,0.1);--bd2:rgba(255,255,255,0.2);
+  --sh:0 2px 12px rgba(0,0,0,0.35);
+  --g50:#0A2A20;--g100:#1D5040;
+}}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh}
+
+/* ===== NAV ===== */
+.nav{position:sticky;top:0;z-index:200;background:var(--bg);border-bottom:.5px solid var(--bd);
+  padding:0 1rem;display:flex;align-items:center;gap:.75rem;height:52px}
+.nav-logo{font-size:20px}
+.nav-title{font-size:15px;font-weight:700;color:var(--tx);flex:1}
+.lang-btns{display:flex;gap:3px}
+.lb{font-size:11px;padding:3px 7px;border-radius:var(--r);border:.5px solid var(--bd2);
+  background:transparent;color:var(--tx2);cursor:pointer;font-family:var(--fn);transition:all .15s}
+.lb.active{background:var(--g400);color:#fff;border-color:var(--g600)}
+
+/* ===== MAIN TABS ===== */
+.main-tabs{display:flex;overflow-x:auto;border-bottom:.5px solid var(--bd);background:var(--bg);padding:0 1rem}
+.main-tabs::-webkit-scrollbar{height:0}
+.mt{padding:12px 14px;font-size:13px;font-weight:500;color:var(--tx3);
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+.mt.active{color:var(--g400);border-bottom-color:var(--g400)}
+
+/* ===== CONTENT ===== */
+.content{max-width:800px;margin:0 auto;padding:1.5rem 1rem 5rem}
+
+/* ===== BUTTONS ===== */
+.btn{padding:9px 14px;font-size:13px;border-radius:var(--r);border:.5px solid var(--bd2);
+  background:var(--bg);color:var(--tx);cursor:pointer;font-family:var(--fn);
+  font-weight:500;transition:background .15s;white-space:nowrap}
+.btn:hover{background:var(--bg2)}
+.btn.primary{background:var(--g400);color:#fff;border-color:var(--g600)}
+.btn.primary:hover{background:var(--g600)}
+.btn.warn{background:var(--a400);color:#fff;border-color:var(--a800)}
+.btn.danger{background:var(--r400);color:#fff;border-color:#A32D2D}
+.btn.full{width:100%}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ===== MAP TAB ===== */
+.map-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.map-wrap{position:relative;border-radius:var(--rl);overflow:hidden;border:.5px solid var(--bd2);
+  background:var(--bg2);margin-bottom:1rem}
+#map-canvas{width:100%;display:block;cursor:crosshair;touch-action:none}
+.map-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:1rem}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* ===== PLANT LIST ===== */
+.plant-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:1rem}
+.plant-card{background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rl);
+  overflow:hidden;cursor:pointer;transition:box-shadow .15s;box-shadow:var(--sh)}
+.plant-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.12)}
+.plant-card-top{background:var(--g50);padding:.85rem;display:flex;align-items:center;gap:10px;
+  border-bottom:.5px solid var(--g100)}
+.plant-card-emoji{font-size:28px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  background:var(--g100);border-radius:var(--r);flex-shrink:0}
+.plant-card-name{font-size:14px;font-weight:700;color:var(--g800)}
+.plant-card-latin{font-size:11px;color:var(--g600);font-style:italic;margin-top:2px}
+.plant-card-body{padding:.75rem}
+.plant-card-loc{font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:4px}
+.plant-card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:.5rem}
+.tag{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--g50);color:var(--g800);font-weight:500}
+.plant-card-cover{width:100%;height:110px;object-fit:cover;display:block;background:var(--g50)}
+.plant-card-cover-wrap{position:relative}
+.plant-card-cover-badge{position:absolute;bottom:6px;left:8px;font-size:18px;
+  background:rgba(255,255,255,0.88);border-radius:6px;padding:2px 5px;backdrop-filter:blur(4px)}
+.modal-hero-photo{width:64px;height:64px;object-fit:cover;border-radius:var(--r);flex-shrink:0;
+  border:.5px solid var(--g100);box-shadow:0 2px 8px rgba(0,0,0,0.12)}
+
+/* ===== PASSPORT ===== */
+.passport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:1rem}
+.passport{background:var(--bg);border:2px solid var(--g400);border-radius:var(--rxl);
+  overflow:hidden;position:relative;box-shadow:0 4px 16px rgba(29,158,117,0.15)}
+.passport-header{background:linear-gradient(135deg,var(--g600),var(--g400));
+  padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem}
+.passport-school{font-size:11px;color:rgba(255,255,255,0.8);letter-spacing:.05em}
+.passport-title{font-size:15px;font-weight:700;color:#fff}
+.passport-number{margin-left:auto;font-size:10px;color:rgba(255,255,255,0.7);font-family:monospace}
+.passport-body{padding:1rem 1.25rem}
+.passport-plant-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem;
+  padding-bottom:.85rem;border-bottom:.5px solid var(--bd)}
+.passport-emoji-box{width:52px;height:52px;background:var(--g50);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;
+  border:.5px solid var(--g100)}
+.passport-pname{font-size:16px;font-weight:700;color:var(--tx)}
+.passport-platin{font-size:11px;color:var(--tx3);font-style:italic;margin-top:2px}
+.passport-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.pf-label{font-size:10px;color:var(--tx3);margin-bottom:2px}
+.pf-val{font-size:12px;font-weight:600;color:var(--tx)}
+.passport-footer{background:var(--g50);padding:.6rem 1.25rem;
+  display:flex;align-items:center;justify-content:space-between;border-top:.5px solid var(--g100)}
+.passport-loc-text{font-size:11px;color:var(--g600);font-weight:500}
+.passport-qr{width:36px;height:36px;background:var(--bg);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;font-size:20px}
+.passport-stamp{position:absolute;top:50%;right:12px;transform:translateY(-50%) rotate(15deg);
+  font-size:36px;opacity:.07;pointer-events:none}
+
+/* ===== TREASURE HUNT ===== */
+.hunt-header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+  border-radius:var(--rl);padding:1.5rem;color:#fff;text-align:center;margin-bottom:1rem}
+.hunt-title{font-size:22px;font-weight:700;margin-bottom:.5rem}
+.hunt-sub{font-size:13px;opacity:.8}
+.hunt-progress{background:rgba(255,255,255,0.15);border-radius:99px;height:8px;margin-top:1rem;overflow:hidden}
+.hunt-progress-fill{background:var(--g200);height:100%;border-radius:99px;transition:width .5s}
+.hunt-progress-label{font-size:12px;margin-top:.5rem;opacity:.8}
+
+.hunt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:1rem}
+.hunt-card{background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rl);
+  padding:.85rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.hunt-card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+.hunt-card.found{border-color:var(--g400);background:var(--g50)}
+.hunt-card.found::after{content:'✓';position:absolute;top:6px;right:8px;
+  color:var(--g400);font-weight:700;font-size:14px}
+.hunt-card-emoji{font-size:32px;margin-bottom:.5rem}
+.hunt-card-name{font-size:12px;font-weight:600;color:var(--tx)}
+.hunt-card-hint{font-size:11px;color:var(--tx3);margin-top:3px}
+.hunt-card-secret{font-size:11px;color:var(--tx3);margin-top:3px;
+  filter:blur(4px);transition:filter .3s;user-select:none}
+.hunt-card:hover .hunt-card-secret{filter:blur(0)}
+
+.found-badge{display:inline-flex;align-items:center;gap:4px;
+  background:var(--g50);border:.5px solid var(--g100);border-radius:99px;
+  padding:3px 10px;font-size:11px;font-weight:600;color:var(--g800);margin-top:.5rem}
+
+/* ===== ADD PLANT FORM ===== */
+.form-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
+  display:flex;align-items:flex-end;justify-content:center}
+.form-sheet{background:var(--bg);border-radius:var(--rxl) var(--rxl) 0 0;
+  width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:1.5rem}
+.form-handle{width:36px;height:4px;background:var(--bd2);border-radius:99px;margin:0 auto 1rem}
+.form-title{font-size:17px;font-weight:700;color:var(--tx);margin-bottom:1.25rem}
+.form-row{margin-bottom:1rem}
+.form-label{font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:.4rem;display:block}
+.form-input{width:100%;padding:9px 12px;border-radius:var(--r);border:.5px solid var(--bd2);
+  background:var(--bg2);color:var(--tx);font-size:14px;font-family:var(--fn)}
+.form-input:focus{outline:none;border-color:var(--g400);background:var(--bg)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gps-row{display:flex;gap:8px;align-items:flex-end}
+.gps-row .form-input{flex:1}
+.color-options{display:flex;gap:6px;flex-wrap:wrap}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.color-opt.selected{border-color:var(--tx);transform:scale(1.15)}
+
+/* ===== DETAIL MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
+  display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--bg);border-radius:var(--rxl);width:100%;max-width:480px;
+  max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+.modal-hero{background:var(--g50);padding:1.25rem;display:flex;align-items:center;
+  gap:1rem;border-bottom:.5px solid var(--g100)}
+.modal-emoji{font-size:36px;width:60px;height:60px;background:var(--g100);
+  border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-name{font-size:18px;font-weight:700;color:var(--g800)}
+.modal-latin{font-size:12px;color:var(--g600);font-style:italic;margin-top:2px}
+.modal-body{padding:1.25rem}
+.modal-section{margin-bottom:1rem}
+.modal-section-title{font-size:11px;font-weight:700;color:var(--tx3);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+.info-row{display:flex;gap:8px;padding:6px 0;border-bottom:.5px solid var(--bd)}
+.info-row:last-child{border-bottom:none}
+.info-key{font-size:12px;color:var(--tx2);min-width:80px}
+.info-val{font-size:12px;font-weight:600;color:var(--tx);flex:1}
+.modal-actions{padding:1rem 1.25rem;display:flex;gap:8px;border-top:.5px solid var(--bd);flex-wrap:wrap}
+
+/* ===== EMPTY STATE ===== */
+.empty{text-align:center;padding:3rem 1rem;color:var(--tx3)}
+.empty-icon{font-size:48px;margin-bottom:.75rem}
+.empty-t{font-size:15px;font-weight:600;margin-bottom:.5rem;color:var(--tx2)}
+.empty-s{font-size:13px}
+
+/* ===== MISC ===== */
+.hidden{display:none!important}
+.chip{font-size:11px;padding:3px 9px;border-radius:99px;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+.chip-green{background:var(--g50);color:var(--g800)}
+.chip-blue{background:var(--b50);color:var(--b800)}
+.chip-amber{background:var(--a50);color:var(--a800)}
+.sec-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.stat-card{background:var(--bg2);border-radius:var(--r);padding:.85rem;text-align:center}
+.stat-num{font-size:24px;font-weight:700;color:var(--g400)}
+.stat-label{font-size:11px;color:var(--tx3);margin-top:2px}
+
+/* ===== PRINT STYLES ===== */
+@media print{
+  body{background:#fff!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .nav,.main-tabs,.no-print{display:none!important}
+  .print-only{display:block!important}
+  .passport{break-inside:avoid;margin-bottom:1rem;border:2px solid #1D9E75!important}
+  .passport-header{background:#1D9E75!important;-webkit-print-color-adjust:exact!important}
+  .content{padding:.5rem;max-width:100%}
+  .passport-grid{grid-template-columns:repeat(2,1fr)}
+  @page{margin:15mm;size:A4}
+}
+.print-only{display:none}
+
+/* ===== AI PHOTO FORM ===== */
+.step-bar{display:flex;align-items:center;gap:0;margin-bottom:1.5rem}
+.step-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--tx3);flex:1}
+.step-item.active{color:var(--g400)}
+.step-item.done{color:var(--g600)}
+.step-circle{width:26px;height:26px;border-radius:50%;border:2px solid var(--bd2);display:flex;
+  align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(--bg)}
+.step-item.active .step-circle{border-color:var(--g400);color:var(--g400);background:var(--g50)}
+.step-item.done .step-circle{border-color:var(--g400);background:var(--g400);color:#fff}
+.step-line{flex:1;height:1px;background:var(--bd2);margin:0 4px}
+.step-line.done{background:var(--g400)}
+
+.photo-upload-zone{border:1.5px dashed var(--bd2);border-radius:var(--rl);padding:2rem 1rem;
+  text-align:center;cursor:pointer;background:var(--bg2);position:relative;transition:all .2s;margin-bottom:.75rem}
+.photo-upload-zone:hover{border-color:var(--g400);background:var(--g50)}
+.photo-upload-zone.drag{border-color:var(--g400);background:var(--g50)}
+.photo-upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.photo-preview-img{width:100%;max-height:200px;object-fit:cover;border-radius:var(--r);margin-bottom:.75rem;border:.5px solid var(--bd)}
+
+.ai-loading{text-align:center;padding:2rem}
+.ai-spinner{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--g400);
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-status{font-size:13px;color:var(--tx2)}
+
+.ai-result-banner{background:var(--g50);border:.5px solid var(--g100);border-radius:var(--r);
+  padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.ai-result-emoji{font-size:28px}
+.ai-result-name{font-size:15px;font-weight:700;color:var(--g800)}
+.ai-result-latin{font-size:12px;color:var(--g600);font-style:italic}
+.ai-conf-badge{margin-left:auto;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;
+  background:var(--g200);color:var(--g800);flex-shrink:0}
+.field-ai-tag{font-size:10px;background:var(--g50);color:var(--g600);padding:1px 6px;
+  border-radius:99px;margin-left:4px;font-weight:600}
+
+.no-api-key{background:var(--a50);border:.5px solid var(--a400);border-radius:var(--r);
+  padding:.85rem 1rem;font-size:13px;color:var(--a800);margin-bottom:1rem;line-height:1.6}
+
+/* ===== MODAL SUB-TABS ===== */
+.modal-subtabs{display:flex;border-bottom:.5px solid var(--bd);padding:0 1.25rem;overflow-x:auto}
+.modal-subtabs::-webkit-scrollbar{height:0}
+.mst{padding:10px 12px;font-size:13px;font-weight:500;color:var(--tx3);
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.mst.active{color:var(--g400);border-bottom-color:var(--g400)}
+
+/* ===== CARE ITEMS ===== */
+.care-item{display:flex;gap:.75rem;padding:.85rem 0;border-bottom:.5px solid var(--bd)}
+.care-item:last-child{border-bottom:none}
+.care-icon{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0;background:var(--bg2);border:.5px solid var(--bd)}
+.care-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:3px}
+.care-desc{font-size:12px;color:var(--tx2);line-height:1.6}
+.nat-fert-box{background:var(--g50);border-radius:var(--r);padding:.85rem 1rem;margin-top:.75rem;border:.5px solid var(--g100)}
+.nat-fert-title{font-size:12px;font-weight:700;color:var(--g800);margin-bottom:.5rem}
+.nat-fert-li{font-size:12px;color:var(--tx2);padding:3px 0;display:flex;gap:6px;align-items:baseline}
+
+/* ===== PROBLEMS ===== */
+.problem-item{padding:.85rem 0;border-bottom:.5px solid var(--bd)}
+.problem-item:last-child{border-bottom:none}
+.problem-name{font-size:13px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.sev-warn{font-size:10px;padding:2px 8px;border-radius:99px;background:#FFF3CD;color:#856404;font-weight:600}
+.sev-danger{font-size:10px;padding:2px 8px;border-radius:99px;background:#F8D7DA;color:#842029;font-weight:600}
+.sev-info{font-size:10px;padding:2px 8px;border-radius:99px;background:#D1ECF1;color:#0C5460;font-weight:600}
+.problem-line{font-size:12px;color:var(--tx2);margin:2px 0;line-height:1.6}
+.problem-line b{color:var(--tx);font-weight:600}
+
+/* ===== CARE CALENDAR ===== */
+.season-block{margin-bottom:1.25rem}
+.season-title{font-size:13px;font-weight:700;color:var(--g800);margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
+.season-tasks{list-style:none;padding:0;margin:0}
+.season-tasks li{font-size:12px;color:var(--tx2);padding:4px 0 4px 14px;position:relative;
+  border-bottom:.5px solid var(--bd);line-height:1.5}
+.season-tasks li:last-child{border-bottom:none}
+.season-tasks li::before{content:'·';position:absolute;left:2px;color:var(--g400);font-size:16px;top:2px}
+
+/* ===== FETCH CARE BOX ===== */
+.fetch-care-box{text-align:center;padding:2rem 1rem;color:var(--tx3)}
+.fetch-care-box .empty-icon{font-size:36px;margin-bottom:.5rem}
+.fetch-care-box .empty-t{font-size:14px;font-weight:600;color:var(--tx2);margin-bottom:.5rem}
+.fetch-care-box .empty-s{font-size:12px;margin-bottom:1rem}
+
+/* ===== BASIC INFO GRID ===== */
+.basic-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.basic-cell{background:var(--bg2);border-radius:var(--r);padding:.6rem .85rem}
+.basic-cell-label{font-size:10px;color:var(--tx3);margin-bottom:3px}
+.basic-cell-val{font-size:13px;font-weight:700;color:var(--tx)}
+.plant-intro{font-size:13px;color:var(--tx2);line-height:1.7;margin-top:.5rem}
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo">🗺️</span>
+  <span class="nav-title" id="nav-title">校園植物地圖</span>
+  <div class="lang-btns">
+    <button class="lb active" onclick="setLang('zh')">繁中</button>
+    <button class="lb" onclick="setLang('en')">EN</button>
+    <button class="lb" onclick="setLang('vi')">VI</button>
+  </div>
+</nav>
+
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <div class="mt active" onclick="showTab('map')"    id="tab-map">🗺️ 植物地圖</div>
+  <div class="mt"        onclick="showTab('list')"   id="tab-list">🌿 植物清單</div>
+  <div class="mt"        onclick="showTab('passport')" id="tab-passport">📘 植物護照</div>
+  <div class="mt"        onclick="showTab('hunt')"   id="tab-hunt">🏆 校園尋寶</div>
+  <div class="mt"        onclick="showTab('settings')" id="tab-settings">⚙️ 設定</div>
+</div>
+
+<!-- ===================== MAP TAB ===================== -->
+<div id="pane-map" class="content">
+  <div class="map-toolbar">
+    <button class="btn primary" onclick="openAddForm()">＋ <span data-i="addPlant">新增植物</span></button>
+    <button class="btn" onclick="toggleAddMode()" id="add-mode-btn">📍 <span data-i="clickMode">點擊地圖新增</span></button>
+    <button class="btn" onclick="exportMapImg()" class="no-print">🖼️ <span data-i="exportMap">匯出地圖</span></button>
+    <select class="btn" id="filter-category" onchange="renderMap()" style="cursor:pointer">
+      <option value="">🔍 全部類別</option>
+    </select>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label" data-i="statTotal">植物總數</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-cats">0</div><div class="stat-label" data-i="statCats">植物種類</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-zones">0</div><div class="stat-label" data-i="statZones">校園區域</div></div>
+  </div>
+
+  <div class="map-wrap">
+    <canvas id="map-canvas" height="440"></canvas>
+  </div>
+
+  <div class="map-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#1D9E75"></div><span data-i="legTree">喬木</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div><span data-i="legShrub">灌木</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div><span data-i="legFlower">花卉</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#BA7517"></div><span data-i="legVine">藤蔓</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8B5CF6"></div><span data-i="legFern">蕨類/草本</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#EC4899"></div><span data-i="legOther">其他</span></div>
+  </div>
+</div>
+
+<!-- ===================== LIST TAB ===================== -->
+<div id="pane-list" class="content hidden">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+    <input class="form-input" id="search-input" placeholder="🔍 搜尋植物..." oninput="renderList()" style="flex:1;min-width:160px">
+    <button class="btn primary" onclick="openAddForm()">＋ <span data-i="addPlant">新增植物</span></button>
+  </div>
+  <div id="plant-list-grid" class="plant-grid"></div>
+  <div id="list-empty" class="empty hidden">
+    <div class="empty-icon">🌱</div>
+    <div class="empty-t" data-i="emptyList">尚無植物資料</div>
+    <div class="empty-s" data-i="emptyListSub">點擊「新增植物」開始建立校園植物資料庫</div>
+  </div>
+</div>
+
+<!-- ===================== PASSPORT TAB ===================== -->
+<div id="pane-passport" class="content hidden">
+  <div class="btn-row no-print" style="margin-bottom:1rem">
+    <button class="btn primary" onclick="window.print()">🖨️ <span data-i="print">列印護照</span></button>
+    <button class="btn" onclick="exportPassportHTML()">💾 <span data-i="saveHTML">下載 HTML</span></button>
+    <select class="btn" id="passport-filter" onchange="renderPassports()" style="cursor:pointer">
+      <option value="">全部植物</option>
+    </select>
+  </div>
+  <div class="passport-grid" id="passport-grid"></div>
+  <div id="passport-empty" class="empty hidden">
+    <div class="empty-icon">📘</div>
+    <div class="empty-t" data-i="emptyPassport">尚無植物護照</div>
+    <div class="empty-s" data-i="emptyPassportSub">在地圖或清單頁面新增植物後，護照會自動產生</div>
+  </div>
+</div>
+
+<!-- ===================== HUNT TAB ===================== -->
+<div id="pane-hunt" class="content hidden">
+  <div class="hunt-header">
+    <div class="hunt-title" data-i="huntTitle">🏆 校園植物尋寶</div>
+    <div class="hunt-sub" data-i="huntSub">找到校園裡的所有植物，完成尋寶挑戰！</div>
+    <div class="hunt-progress"><div class="hunt-progress-fill" id="hunt-bar" style="width:0%"></div></div>
+    <div class="hunt-progress-label" id="hunt-label">0 / 0 已發現</div>
+  </div>
+  <div class="btn-row" style="margin-bottom:1rem">
+    <button class="btn" onclick="resetHunt()">🔄 <span data-i="resetHunt">重置進度</span></button>
+    <button class="btn primary" onclick="exportHuntCard()">📄 <span data-i="exportHunt">下載尋寶卡</span></button>
+  </div>
+  <div id="hunt-grid" class="hunt-grid"></div>
+  <div id="hunt-empty" class="empty hidden">
+    <div class="empty-icon">🏆</div>
+    <div class="empty-t" data-i="emptyHunt">尚無植物資料</div>
+    <div class="empty-s" data-i="emptyHuntSub">請先在地圖或清單頁面新增植物</div>
+  </div>
+</div>
+
+<!-- ===================== SETTINGS TAB ===================== -->
+<div id="pane-settings" class="content hidden">
+  <div class="sec-title" data-i="settingsApiTitle">Google Gemini API 金鑰</div>
+  <div style="background:var(--g50);border:.5px solid var(--g100);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-weight:700;color:var(--g800);margin-bottom:.6rem">✅ <span data-i="settingsApiFree">完全免費！每天 1,500 次，學生夠用</span></div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.8">
+      <b>Step 1</b> <span data-i="settingsStep1">前往</span> <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--g600)">aistudio.google.com/apikey</a><br>
+      <b>Step 2</b> <span data-i="settingsStep2">用 Google 帳號登入（免費，不需信用卡）</span><br>
+      <b>Step 3</b> <span data-i="settingsStep3">點「Create API key」→ 複製金鑰</span><br>
+      <b>Step 4</b> <span data-i="settingsStep4">貼到下方欄位，按儲存</span>
+    </div>
+  </div>
+  <div style="margin-bottom:1rem">
+    <input id="settings-api-input" class="form-input" type="password" placeholder="AIza..." style="margin-bottom:.75rem">
+    <button class="btn primary full" onclick="saveApiKey()"><span data-i="settingsSave">儲存金鑰</span></button>
+    <div style="font-size:11px;color:var(--tx3);margin-top:.5rem;text-align:center" data-i="settingsPrivacy">金鑰僅存在你的裝置（localStorage），不上傳任何伺服器。</div>
+  </div>
+
+  <div class="sec-title" style="margin-top:1.5rem" data-i="settingsDataTitle">資料管理</div>
+  <button class="btn danger full" onclick="clearAllData()"><span data-i="settingsClearAll">清除所有資料</span></button>
+
+  <div style="margin-top:1.5rem;padding:.85rem 1rem;background:var(--bg2);border-radius:var(--r);font-size:11px;color:var(--tx3);text-align:center">
+    <span data-i="settingsVersion">版本 2.0 · 校園植物地圖 · AI 辨識引擎：Google Gemini 2.5 Flash-Lite · 資料儲存：本機 localStorage 完全離線可用（API 呼叫除外）</span>
+  </div>
+</div>
+
+<!-- ===================== ADD/EDIT FORM ===================== -->
+<div id="form-overlay" class="form-overlay hidden" onclick="closeFormIfBg(event)">
+  <div class="form-sheet" id="form-sheet">
+    <div class="form-handle"></div>
+    <div class="form-title" id="form-title">新增校園植物</div>
+
+    <!-- Step bar -->
+    <div class="step-bar" id="step-bar">
+      <div class="step-item active" id="step1-item">
+        <div class="step-circle" id="s1c">1</div>
+        <span id="step1-label">拍照辨識</span>
+      </div>
+      <div class="step-line" id="line12"></div>
+      <div class="step-item" id="step2-item">
+        <div class="step-circle" id="s2c">2</div>
+        <span id="step2-label">確認資料</span>
+      </div>
+      <div class="step-line" id="line23"></div>
+      <div class="step-item" id="step3-item">
+        <div class="step-circle" id="s3c">3</div>
+        <span id="step3-label">校園資訊</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: Photo ===== -->
+    <div id="step1-panel">
+      <div id="no-api-warn" class="no-api-key hidden">
+        ⚠️ 尚未設定 Gemini API 金鑰，無法自動辨識。請至植物照護機器人的「設定」頁面輸入金鑰，或<b>手動填寫</b>資料。
+        <br><button class="btn" style="margin-top:.5rem;font-size:12px" onclick="skipToManual()">直接手動填寫 →</button>
+      </div>
+
+      <!-- Upload zone -->
+      <div id="photo-upload-zone" class="photo-upload-zone">
+        <input type="file" id="photo-input" accept="image/*">
+        <div style="font-size:36px;margin-bottom:.5rem">🌿</div>
+        <div style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:4px" id="upload-title-txt">上傳植物照片</div>
+        <div style="font-size:12px;color:var(--tx3)">點擊選取或拖曳圖片</div>
+      </div>
+      <img id="photo-preview" class="photo-preview-img hidden" src="" alt="">
+
+      <div class="btn-row" style="margin-bottom:.75rem">
+        <button class="btn" onclick="triggerPhotoCamera()">📷 拍照</button>
+        <button class="btn" onclick="triggerPhotoGallery()">🖼️ 相簿</button>
+        <button class="btn" onclick="skipToManual()" style="color:var(--tx3)">✏️ 手動填寫</button>
+      </div>
+
+      <!-- AI loading -->
+      <div id="ai-loading" class="ai-loading hidden">
+        <div class="ai-spinner"></div>
+        <div class="ai-status" id="ai-status-txt">正在辨識植物...</div>
+      </div>
+
+      <!-- AI error -->
+      <div id="ai-error" class="hidden" style="background:var(--r50);border:.5px solid var(--r400);border-radius:var(--r);padding:.75rem 1rem;font-size:13px;color:var(--r800);margin-top:.5rem"></div>
+
+      <div class="btn-row" style="margin-top:.75rem">
+        <button class="btn" onclick="closeForm()" style="flex:1">取消</button>
+        <button class="btn primary" id="analyze-btn" onclick="analyzePhoto()" style="flex:2" disabled>🔍 開始辨識</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: Confirm AI data ===== -->
+    <div id="step2-panel" class="hidden">
+      <div class="ai-result-banner" id="ai-banner">
+        <div class="ai-result-emoji" id="ai-emoji">🌿</div>
+        <div>
+          <div class="ai-result-name" id="ai-name-display">—</div>
+          <div class="ai-result-latin" id="ai-latin-display">—</div>
+        </div>
+        <div class="ai-conf-badge" id="ai-conf">高</div>
+      </div>
+
+      <div style="font-size:11px;color:var(--g600);margin-bottom:.85rem;display:flex;align-items:center;gap:4px">
+        ✨ AI 已自動填入以下資料，請確認或修改後繼續
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">植物名稱 * <span class="field-ai-tag">AI</span></label>
+        <input class="form-input" id="f-name" placeholder="例：黃金葛">
+      </div>
+      <div class="form-row">
+        <label class="form-label">學名 <span class="field-ai-tag">AI</span></label>
+        <input class="form-input" id="f-latin" placeholder="例：Epipremnum aureum">
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">植物類別 <span class="field-ai-tag">AI</span></label>
+          <select class="form-input" id="f-cat">
+            <option value="喬木">🌳 喬木</option>
+            <option value="灌木">🌿 灌木</option>
+            <option value="花卉">🌸 花卉</option>
+            <option value="藤蔓">🍃 藤蔓</option>
+            <option value="蕨類/草本">🌱 蕨類/草本</option>
+            <option value="其他">🌾 其他</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">圖示 <span class="field-ai-tag">AI</span></label>
+          <input class="form-input" id="f-emoji" placeholder="🌿" maxlength="2" style="font-size:20px;text-align:center">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">光照需求 <span class="field-ai-tag">AI</span></label>
+        <input class="form-input" id="f-sun" placeholder="例：全日照、半日照">
+      </div>
+      <div class="form-row">
+        <label class="form-label">澆水頻率 <span class="field-ai-tag">AI</span></label>
+        <input class="form-input" id="f-water" placeholder="例：每3天一次">
+      </div>
+      <div class="form-row">
+        <label class="form-label">植物介紹 <span class="field-ai-tag">AI</span></label>
+        <textarea class="form-input" id="f-desc" rows="3"></textarea>
+      </div>
+
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn" onclick="goStep(1)" style="flex:1">← 重新拍照</button>
+        <button class="btn primary" onclick="goStep(3)" style="flex:2">確認，繼續 →</button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: Campus info ===== -->
+    <div id="step3-panel" class="hidden">
+      <div style="font-size:12px;color:var(--tx3);margin-bottom:1rem">📍 填入這株植物在校園的位置資訊</div>
+
+      <div class="form-row">
+        <label class="form-label">校園位置 / 區域</label>
+        <input class="form-input" id="f-zone" placeholder="例：操場旁、圖書館門口、B棟走廊...">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">GPS 座標（選填）</label>
+        <div class="gps-row">
+          <input class="form-input" id="f-lat" placeholder="緯度">
+          <input class="form-input" id="f-lng" placeholder="經度">
+          <button class="btn primary" onclick="getGPS()" style="flex-shrink:0">📍 定位</button>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">尋寶提示（給學生的線索）</label>
+        <input class="form-input" id="f-hint" placeholder="例：在大樹下、靠近水源...">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">地圖位置（點選地圖，或輸入座標）</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="f-mx" placeholder="X (0-100)%" type="number" min="0" max="100">
+          <input class="form-input" id="f-my" placeholder="Y (0-100)%" type="number" min="0" max="100">
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn" onclick="goStep(2)" style="flex:1">← 上一步</button>
+        <button class="btn primary" onclick="savePlant()" style="flex:2" id="save-btn">✅ 儲存到地圖</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===================== DETAIL MODAL ===================== -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeModalIfBg(event)">
+  <div class="modal" id="modal">
+    <div class="modal-hero">
+      <div class="modal-emoji" id="m-emoji">🌱</div>
+      <div style="flex:1">
+        <div class="modal-name" id="m-name">—</div>
+        <div class="modal-latin" id="m-latin">—</div>
+        <div style="margin-top:4px" id="m-chips"></div>
+      </div>
+    </div>
+    <div class="modal-subtabs">
+      <div class="mst active" onclick="switchModalTab('basic')"    id="mst-basic">基本資訊</div>
+      <div class="mst"        onclick="switchModalTab('care')"     id="mst-care">照護方式</div>
+      <div class="mst"        onclick="switchModalTab('problems')" id="mst-problems">問題診斷</div>
+      <div class="mst"        onclick="switchModalTab('calendar')" id="mst-calendar">照護日曆</div>
+    </div>
+    <div class="modal-body" style="padding:1rem 1.25rem">
+      <!-- Basic Info -->
+      <div id="mpane-basic">
+        <div id="m-basic-grid" class="basic-grid"></div>
+        <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem" id="m-loc-label">位置資訊</div>
+        <div id="m-loc-info"></div>
+        <div id="m-desc" class="plant-intro"></div>
+      </div>
+      <!-- Care -->
+      <div id="mpane-care" class="hidden">
+        <div id="m-care-content"></div>
+      </div>
+      <!-- Problems -->
+      <div id="mpane-problems" class="hidden">
+        <div id="m-problems-content"></div>
+      </div>
+      <!-- Calendar -->
+      <div id="mpane-calendar" class="hidden">
+        <div id="m-calendar-content"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn primary" onclick="printPassportById(currentPlantId)">📘 <span data-i="viewPassport">查看護照</span></button>
+      <button class="btn" onclick="editPlant(currentPlantId)">✏️ <span data-i="edit">編輯</span></button>
+      <button class="btn danger" onclick="deletePlant(currentPlantId)">🗑️ <span data-i="delete">刪除</span></button>
+      <button class="btn" onclick="closeModal()" style="margin-left:auto" data-i="close">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== I18N =====
+const I18N = {
+  zh:{
+    addPlant:'新增植物',clickMode:'點擊地圖新增',exportMap:'匯出地圖',
+    statTotal:'植物總數',statCats:'植物種類',statZones:'校園區域',
+    legTree:'喬木',legShrub:'灌木',legFlower:'花卉',legVine:'藤蔓',legFern:'蕨類/草本',legOther:'其他',
+    print:'列印護照',saveHTML:'下載 HTML',
+    huntTitle:'🏆 校園植物尋寶',huntSub:'找到校園裡的所有植物，完成尋寶挑戰！',
+    resetHunt:'重置進度',exportHunt:'下載尋寶卡',
+    emptyList:'尚無植物資料',emptyListSub:'點擊「新增植物」開始建立校園植物資料庫',
+    emptyPassport:'尚無植物護照',emptyPassportSub:'在地圖或清單頁面新增植物後，護照會自動產生',
+    emptyHunt:'尚無植物資料',emptyHuntSub:'請先在地圖或清單頁面新增植物',
+    fldName:'植物名稱 *',fldLatin:'學名',fldCat:'植物類別',fldEmoji:'代表圖示',
+    fldZone:'校園位置 / 區域',fldDesc:'植物介紹',fldSun:'光照需求',fldWater:'澆水頻率',
+    fldHint:'尋寶提示（給學生的線索）',fldMapPos:'地圖位置',
+    cancel:'取消',save:'儲存植物',edit:'編輯',delete:'刪除',close:'關閉',
+    secBasic:'基本資料',secDesc:'植物介紹',viewPassport:'查看護照',
+    navTitle:'校園植物地圖',
+    tabMap:'🗺️ 植物地圖',tabList:'🌿 植物清單',tabPassport:'📘 植物護照',tabHunt:'🏆 校園尋寶',
+    fieldCat:'類別',fieldZone:'位置',fieldLat:'GPS',fieldSun:'光照',fieldWater:'澆水',
+    passportTitle:'植物護照',passportSchool:'校園植物資料庫',
+    huntFound:'已發現',huntNotFound:'未發現',
+    hintLabel:'🔍 提示：',huntHover:'（滑鼠移過顯示位置）',
+    confirmDelete:'確定要刪除這株植物嗎？',
+    gpsError:'無法取得GPS，請手動輸入位置',
+    nameRequired:'請輸入植物名稱',
+    addModeOn:'📍 點擊地圖放置位置（再點一次取消）',
+    addModeOff:'📍 點擊地圖新增',
+    discovered:'發現了！',
+    tabSettings:'⚙️ 設定',
+    settingsApiTitle:'Google Gemini API 金鑰',settingsApiFree:'完全免費！每天 1,500 次，學生夠用',
+    settingsStep1:'前往',settingsStep2:'用 Google 帳號登入（免費，不需信用卡）',
+    settingsStep3:'點「Create API key」→ 複製金鑰',settingsStep4:'貼到下方欄位，按儲存',
+    settingsSave:'儲存金鑰',settingsPrivacy:'金鑰僅存在你的裝置（localStorage），不上傳任何伺服器。',
+    settingsDataTitle:'資料管理',settingsClearAll:'清除所有資料',
+    settingsVersion:'版本 2.0 · 校園植物地圖 · AI 辨識引擎：Google Gemini 2.5 Flash-Lite · 資料儲存：本機 localStorage',
+    settingsApiSaved:'✅ 金鑰已儲存！',settingsApiCleared:'已清除金鑰',settingsClearConfirm:'確定要清除所有資料嗎？此操作無法復原！',
+  },
+  en:{
+    addPlant:'Add Plant',clickMode:'Click Map to Add',exportMap:'Export Map',
+    statTotal:'Total Plants',statCats:'Species',statZones:'Campus Zones',
+    legTree:'Tree',legShrub:'Shrub',legFlower:'Flower',legVine:'Vine',legFern:'Fern/Herb',legOther:'Other',
+    print:'Print Passports',saveHTML:'Download HTML',
+    huntTitle:'🏆 Campus Plant Treasure Hunt',huntSub:'Find all plants on campus and complete the challenge!',
+    resetHunt:'Reset Progress',exportHunt:'Download Hunt Card',
+    emptyList:'No plants yet',emptyListSub:'Click "Add Plant" to start building your campus plant database',
+    emptyPassport:'No passports yet',emptyPassportSub:'Add plants in Map or List view to generate passports',
+    emptyHunt:'No plants yet',emptyHuntSub:'Add plants in Map or List view first',
+    fldName:'Plant Name *',fldLatin:'Scientific Name',fldCat:'Category',fldEmoji:'Emoji Icon',
+    fldZone:'Campus Location / Zone',fldDesc:'Description',fldSun:'Sunlight',fldWater:'Watering',
+    fldHint:'Hunt Clue (for students)',fldMapPos:'Map Position',
+    cancel:'Cancel',save:'Save Plant',edit:'Edit',delete:'Delete',close:'Close',
+    secBasic:'Basic Info',secDesc:'About This Plant',viewPassport:'View Passport',
+    navTitle:'Campus Plant Map',
+    tabMap:'🗺️ Plant Map',tabList:'🌿 Plant List',tabPassport:'📘 Passports',tabHunt:'🏆 Hunt',
+    fieldCat:'Category',fieldZone:'Location',fieldLat:'GPS',fieldSun:'Sunlight',fieldWater:'Watering',
+    passportTitle:'Plant Passport',passportSchool:'Campus Plant Database',
+    huntFound:'Found',huntNotFound:'Not Found',
+    hintLabel:'🔍 Hint:',huntHover:'(hover to reveal location)',
+    confirmDelete:'Delete this plant?',
+    gpsError:'Cannot get GPS, please enter manually',
+    nameRequired:'Please enter a plant name',
+    addModeOn:'📍 Click map to place (click again to cancel)',
+    addModeOff:'📍 Click Map to Add',
+    discovered:'Discovered!',
+    tabSettings:'⚙️ Settings',
+    settingsApiTitle:'Google Gemini API Key',settingsApiFree:'Completely free! 1,500 requests/day — enough for students',
+    settingsStep1:'Visit',settingsStep2:'Sign in with Google (free, no credit card needed)',
+    settingsStep3:'Click "Create API key" → Copy the key',settingsStep4:'Paste below and save',
+    settingsSave:'Save Key',settingsPrivacy:'Key is stored only on your device (localStorage) — never sent to any server.',
+    settingsDataTitle:'Data Management',settingsClearAll:'Clear All Data',
+    settingsVersion:'Version 2.0 · Campus Plant Map · AI Engine: Google Gemini 2.5 Flash-Lite · Storage: Local localStorage',
+    settingsApiSaved:'✅ Key saved!',settingsApiCleared:'Key cleared',settingsClearConfirm:'Clear all data? This cannot be undone!',
+  },
+  vi:{
+    addPlant:'Thêm Cây',clickMode:'Nhấp Bản Đồ',exportMap:'Xuất Bản Đồ',
+    statTotal:'Tổng Số Cây',statCats:'Loài',statZones:'Khu Vực',
+    legTree:'Cây Gỗ',legShrub:'Cây Bụi',legFlower:'Hoa',legVine:'Dây Leo',legFern:'Dương Xỉ',legOther:'Khác',
+    print:'In Hộ Chiếu',saveHTML:'Tải HTML',
+    huntTitle:'🏆 Săn Tìm Cây Trường',huntSub:'Tìm tất cả các cây trong trường và hoàn thành thử thách!',
+    resetHunt:'Đặt Lại',exportHunt:'Tải Phiếu Săn',
+    emptyList:'Chưa có cây nào',emptyListSub:'Nhấn "Thêm Cây" để bắt đầu xây dựng cơ sở dữ liệu',
+    emptyPassport:'Chưa có hộ chiếu',emptyPassportSub:'Thêm cây vào bản đồ để tạo hộ chiếu tự động',
+    emptyHunt:'Chưa có cây nào',emptyHuntSub:'Vui lòng thêm cây vào bản đồ trước',
+    fldName:'Tên Cây *',fldLatin:'Tên Khoa Học',fldCat:'Loại',fldEmoji:'Biểu Tượng',
+    fldZone:'Vị Trí / Khu Vực',fldDesc:'Mô Tả',fldSun:'Ánh Sáng',fldWater:'Tưới Nước',
+    fldHint:'Gợi Ý Săn Tìm',fldMapPos:'Vị Trí Bản Đồ',
+    cancel:'Hủy',save:'Lưu Cây',edit:'Sửa',delete:'Xóa',close:'Đóng',
+    secBasic:'Thông Tin',secDesc:'Giới Thiệu',viewPassport:'Xem Hộ Chiếu',
+    navTitle:'Bản Đồ Cây Trường',
+    tabMap:'🗺️ Bản Đồ',tabList:'🌿 Danh Sách',tabPassport:'📘 Hộ Chiếu',tabHunt:'🏆 Săn Tìm',
+    fieldCat:'Loại',fieldZone:'Vị Trí',fieldLat:'GPS',fieldSun:'Ánh Sáng',fieldWater:'Tưới',
+    passportTitle:'Hộ Chiếu Cây',passportSchool:'Cơ Sở Dữ Liệu Cây Trường',
+    huntFound:'Đã Tìm Thấy',huntNotFound:'Chưa Tìm Thấy',
+    hintLabel:'🔍 Gợi ý:',huntHover:'(di chuột để xem vị trí)',
+    confirmDelete:'Xóa cây này?',
+    gpsError:'Không lấy được GPS, vui lòng nhập thủ công',
+    nameRequired:'Vui lòng nhập tên cây',
+    addModeOn:'📍 Nhấp bản đồ để đặt (nhấp lại để hủy)',
+    addModeOff:'📍 Nhấp Bản Đồ',
+    discovered:'Đã Tìm Thấy!',
+    tabSettings:'⚙️ Cài Đặt',
+    settingsApiTitle:'Google Gemini API Key',settingsApiFree:'Hoàn toàn miễn phí! 1.500 lần/ngày — đủ cho học sinh',
+    settingsStep1:'Truy cập',settingsStep2:'Đăng nhập bằng Google (miễn phí, không cần thẻ tín dụng)',
+    settingsStep3:'Nhấn "Create API key" → Sao chép khóa',settingsStep4:'Dán vào ô bên dưới và lưu',
+    settingsSave:'Lưu Khóa',settingsPrivacy:'Khóa chỉ lưu trên thiết bị của bạn (localStorage) — không gửi đến máy chủ.',
+    settingsDataTitle:'Quản Lý Dữ Liệu',settingsClearAll:'Xóa Tất Cả Dữ Liệu',
+    settingsVersion:'Phiên bản 2.0 · Bản Đồ Cây Trường · AI: Google Gemini 2.5 Flash-Lite · Lưu trữ: localStorage',
+    settingsApiSaved:'✅ Đã lưu khóa!',settingsApiCleared:'Đã xóa khóa',settingsClearConfirm:'Xóa tất cả dữ liệu? Không thể hoàn tác!',
+  }
+};
+let lang = localStorage.getItem('plant-map-lang') || 'zh';
+function t(k){ return I18N[lang][k] || I18N.zh[k] || k; }
+
+function setLang(l){
+  lang = l;
+  localStorage.setItem('plant-map-lang',l);
+  document.querySelectorAll('.lb').forEach((b,i)=>b.classList.toggle('active',['zh','en','vi'][i]===l));
+  applyI18n();
+  renderAll();
+}
+function applyI18n(){
+  document.title = t('navTitle') + ' · Campus Plant Map';
+  document.getElementById('nav-title').textContent = t('navTitle');
+  ['map','list','passport','hunt','settings'].forEach((id,i)=>{
+    document.getElementById('tab-'+id).textContent = t(['tabMap','tabList','tabPassport','tabHunt','tabSettings'][i]);
+  });
+  document.querySelectorAll('[data-i]').forEach(el=>{
+    const k = el.getAttribute('data-i');
+    if(k) el.textContent = t(k);
+  });
+}
+
+// ===== DATA =====
+let plants = JSON.parse(localStorage.getItem('campus-plants') || '[]');
+let huntFound = JSON.parse(localStorage.getItem('campus-hunt') || '{}');
+
+function savePlants(){ localStorage.setItem('campus-plants', JSON.stringify(plants)); }
+function saveHunt(){ localStorage.setItem('campus-hunt', JSON.stringify(huntFound)); }
+
+const CAT_COLORS = {
+  '喬木':'#1D9E75','Tree':'#1D9E75','Cây Gỗ':'#1D9E75',
+  '灌木':'#378ADD','Shrub':'#378ADD','Cây Bụi':'#378ADD',
+  '花卉':'#E24B4A','Flower':'#E24B4A','Hoa':'#E24B4A',
+  '藤蔓':'#BA7517','Vine':'#BA7517','Dây Leo':'#BA7517',
+  '蕨類/草本':'#8B5CF6','Fern/Herb':'#8B5CF6','Dương Xỉ':'#8B5CF6',
+  '其他':'#EC4899','Other':'#EC4899','Khác':'#EC4899',
+};
+function catColor(cat){
+  return CAT_COLORS[cat] || '#1D9E75';
+}
+
+// ===== TAB NAV =====
+let currentTab = 'map';
+function showTab(tab){
+  currentTab = tab;
+  ['map','list','passport','hunt','settings'].forEach(id=>{
+    document.getElementById('pane-'+id).classList.toggle('hidden', id!==tab);
+    document.getElementById('tab-'+id).classList.toggle('active', id===tab);
+  });
+  if(tab==='map') renderMap();
+  if(tab==='list') renderList();
+  if(tab==='passport') renderPassports();
+  if(tab==='hunt') renderHunt();
+  if(tab==='settings') initSettings();
+}
+
+// ===== MAP =====
+let canvas, ctx;
+let mapImg = null;
+let addMode = false;
+let pendingMapX = null, pendingMapY = null;
+
+function initCanvas(){
+  canvas = document.getElementById('map-canvas');
+  ctx = canvas.getContext('2d');
+  // Responsive width
+  const w = canvas.parentElement.offsetWidth;
+  canvas.width = w;
+  canvas.height = Math.round(w * 0.6);
+
+  canvas.addEventListener('click', onMapClick);
+  canvas.addEventListener('touchend', e=>{
+    e.preventDefault();
+    const r = canvas.getBoundingClientRect();
+    const t = e.changedTouches[0];
+    const x = (t.clientX - r.left) / r.width * 100;
+    const y = (t.clientY - r.top) / r.height * 100;
+    handleMapClick(x, y);
+  });
+}
+
+function onMapClick(e){
+  const r = canvas.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width * 100;
+  const y = (e.clientY - r.top) / r.height * 100;
+  handleMapClick(x, y);
+}
+
+function handleMapClick(x, y){
+  if(addMode){
+    pendingMapX = Math.round(x);
+    pendingMapY = Math.round(y);
+    document.getElementById('f-mx').value = pendingMapX;
+    document.getElementById('f-my').value = pendingMapY;
+    addMode = false;
+    document.getElementById('add-mode-btn').textContent = t('addModeOff');
+    openAddForm();
+    return;
+  }
+  // Check if clicked on a plant marker
+  const mw = canvas.width, mh = canvas.height;
+  for(const p of plants){
+    if(p.mapX == null) continue;
+    const px = p.mapX / 100 * mw;
+    const py = p.mapY / 100 * mh;
+    const dx = (x/100*mw) - px, dy = (y/100*mh) - py;
+    if(Math.sqrt(dx*dx+dy*dy) < 18){
+      showPlantDetail(p.id);
+      return;
+    }
+  }
+}
+
+function toggleAddMode(){
+  addMode = !addMode;
+  document.getElementById('add-mode-btn').textContent = addMode ? t('addModeOn') : t('addModeOff');
+}
+
+function renderMap(){
+  if(!canvas) initCanvas();
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // Background grid
+  ctx.fillStyle = '#F0F7F4';
+  ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = 'rgba(29,158,117,0.1)';
+  ctx.lineWidth = 1;
+  for(let x=0;x<w;x+=w/10){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke(); }
+  for(let y=0;y<h;y+=h/8){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke(); }
+
+  // Decorative zones
+  const zones = [
+    {x:.05,y:.05,w:.9,h:.9,label:'校園範圍',color:'rgba(29,158,117,0.05)',stroke:'rgba(29,158,117,0.2)'},
+  ];
+  zones.forEach(z=>{
+    ctx.fillStyle = z.color;
+    ctx.strokeStyle = z.stroke;
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, z.x*w, z.y*h, z.w*w, z.h*h, 12);
+    ctx.fill();ctx.stroke();
+    ctx.fillStyle = 'rgba(29,158,117,0.35)';
+    ctx.font = `bold ${Math.max(10,w*0.015)}px sans-serif`;
+    ctx.fillText(z.label, z.x*w+8, z.y*h+16);
+  });
+
+  // Filter
+  const filterCat = document.getElementById('filter-category')?.value || '';
+
+  // Plant markers
+  const visPlants = filterCat ? plants.filter(p=>p.category===filterCat) : plants;
+  visPlants.forEach(p=>{
+    if(p.mapX == null) return;
+    const px = p.mapX/100*w, py = p.mapY/100*h;
+    const color = catColor(p.category);
+    // Shadow
+    ctx.shadowColor = 'rgba(0,0,0,0.15)';
+    ctx.shadowBlur = 6;
+    // Marker pin
+    ctx.beginPath();
+    ctx.arc(px, py-4, 13, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Emoji / number
+    ctx.font = `${Math.max(12,w*0.02)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.emoji||'🌿', px, py-4);
+    // Name label
+    ctx.fillStyle = '#333';
+    ctx.font = `bold ${Math.max(9,w*0.013)}px sans-serif`;
+    ctx.fillText(p.name, px, py+12);
+  });
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+
+  // Stats
+  const cats = [...new Set(plants.map(p=>p.category))];
+  const zones2 = [...new Set(plants.map(p=>p.zone).filter(Boolean))];
+  document.getElementById('stat-total').textContent = plants.length;
+  document.getElementById('stat-cats').textContent = cats.length;
+  document.getElementById('stat-zones').textContent = zones2.length;
+
+  // Update filter dropdown
+  updateCategoryDropdowns();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function exportMapImg(){
+  renderMap();
+  const a = document.createElement('a');
+  a.download = 'campus-plant-map.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+// ===== LIST =====
+function renderList(){
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const filtered = plants.filter(p=>
+    p.name.toLowerCase().includes(q) ||
+    (p.latin||'').toLowerCase().includes(q) ||
+    (p.zone||'').toLowerCase().includes(q)
+  );
+  const grid = document.getElementById('plant-list-grid');
+  const empty = document.getElementById('list-empty');
+  if(!filtered.length){
+    grid.innerHTML=''; empty.classList.remove('hidden'); return;
+  }
+  empty.classList.add('hidden');
+  grid.innerHTML = filtered.map(p=>`
+    <div class="plant-card" onclick="showPlantDetail('${p.id}')">
+      ${p.photo ? `<div class="plant-card-cover-wrap">
+        <img class="plant-card-cover" src="${p.photo}" alt="${p.name}" loading="lazy">
+        <div class="plant-card-cover-badge">${p.emoji||'🌿'}</div>
+      </div>` : ''}
+      <div class="plant-card-top" ${p.photo ? 'style="background:var(--bg)"' : ''}>
+        ${!p.photo ? `<div class="plant-card-emoji">${p.emoji||'🌿'}</div>` : ''}
+        <div>
+          <div class="plant-card-name">${p.name}</div>
+          <div class="plant-card-latin">${p.latin||'—'}</div>
+        </div>
+      </div>
+      <div class="plant-card-body">
+        <div class="plant-card-loc">📍 ${p.zone||'—'}</div>
+        <div class="plant-card-tags">
+          <span class="tag">${p.category||'—'}</span>
+          ${p.lat ? '<span class="tag">📡 GPS</span>' : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== PASSPORTS =====
+function renderPassports(){
+  const filterCat = document.getElementById('passport-filter')?.value || '';
+  const filtered = filterCat ? plants.filter(p=>p.category===filterCat) : plants;
+  const grid = document.getElementById('passport-grid');
+  const empty = document.getElementById('passport-empty');
+  if(!filtered.length){
+    grid.innerHTML=''; empty.classList.remove('hidden'); return;
+  }
+  empty.classList.add('hidden');
+  grid.innerHTML = filtered.map((p,i)=>passportHTML(p,i)).join('');
+  updateCategoryDropdowns();
+}
+
+function passportHTML(p, idx){
+  const num = String(idx+1).padStart(3,'0');
+  const color = catColor(p.category);
+  return `
+  <div class="passport" id="passport-${p.id}">
+    <div class="passport-stamp">${p.emoji||'🌿'}</div>
+    <div class="passport-header" style="background:linear-gradient(135deg,${color}dd,${color})">
+      <div>
+        <div class="passport-school">${t('passportSchool')}</div>
+        <div class="passport-title">${t('passportTitle')}</div>
+      </div>
+      <div class="passport-number">#${num}</div>
+    </div>
+    <div class="passport-body">
+      <div class="passport-plant-row">
+        <div class="passport-emoji-box">${p.emoji||'🌿'}</div>
+        <div>
+          <div class="passport-pname">${p.name}</div>
+          <div class="passport-platin">${p.latin||'—'}</div>
+        </div>
+      </div>
+      <div class="passport-fields">
+        <div><div class="pf-label">${t('fieldCat')}</div><div class="pf-val">${p.category||'—'}</div></div>
+        <div><div class="pf-label">${t('fieldZone')}</div><div class="pf-val">${p.zone||'—'}</div></div>
+        <div><div class="pf-label">${t('fieldSun')}</div><div class="pf-val">${p.sun||'—'}</div></div>
+        <div><div class="pf-label">${t('fieldWater')}</div><div class="pf-val">${p.water||'—'}</div></div>
+        ${p.lat ? `<div style="grid-column:span 2"><div class="pf-label">GPS</div><div class="pf-val" style="font-size:10px;font-family:monospace">${p.lat}, ${p.lng}</div></div>` : ''}
+      </div>
+      ${p.desc ? `<div style="font-size:11px;color:var(--tx2);line-height:1.5;margin-top:.75rem;padding-top:.75rem;border-top:.5px solid var(--bd)">${p.desc}</div>` : ''}
+    </div>
+    <div class="passport-footer">
+      <div class="passport-loc-text">📍 ${p.zone||'—'}</div>
+      <div class="passport-qr">🌿</div>
+    </div>
+  </div>`;
+}
+
+function printPassportById(id){
+  closeModal();
+  showTab('passport');
+  setTimeout(()=>window.print(), 300);
+}
+
+function exportPassportHTML(){
+  const filterCat = document.getElementById('passport-filter')?.value || '';
+  const filtered = filterCat ? plants.filter(p=>p.category===filterCat) : plants;
+  const passportsHTML = filtered.map((p,i)=>passportHTML(p,i)).join('');
+  const html = `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<title>植物護照 · Plant Passports</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Arial,sans-serif;padding:20px;background:#f5f5f5}
+.passport-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:800px;margin:0 auto}
+.passport{background:#fff;border:2px solid #1D9E75;border-radius:16px;overflow:hidden;position:relative;break-inside:avoid}
+.passport-stamp{position:absolute;top:50%;right:12px;transform:translateY(-50%) rotate(15deg);font-size:36px;opacity:.07;pointer-events:none}
+.passport-header{padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem;color:#fff}
+.passport-school{font-size:11px;opacity:.8}
+.passport-title{font-size:15px;font-weight:700}
+.passport-number{margin-left:auto;font-size:10px;opacity:.7;font-family:monospace}
+.passport-body{padding:1rem 1.25rem}
+.passport-plant-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem;padding-bottom:.85rem;border-bottom:1px solid #eee}
+.passport-emoji-box{width:52px;height:52px;background:#E1F5EE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:1px solid #9FE1CB}
+.passport-pname{font-size:16px;font-weight:700}
+.passport-platin{font-size:11px;color:#888;font-style:italic;margin-top:2px}
+.passport-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+.pf-label{font-size:10px;color:#888;margin-bottom:2px}
+.pf-val{font-size:12px;font-weight:600}
+.passport-footer{background:#E1F5EE;padding:.6rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #9FE1CB}
+.passport-loc-text{font-size:11px;color:#0F6E56;font-weight:500}
+@media print{body{padding:0;background:#fff}@page{margin:15mm;size:A4}.passport-grid{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<div style="text-align:center;margin-bottom:20px"><h1 style="font-size:20px;color:#1D9E75">🌿 校園植物護照 · Plant Passports</h1><p style="color:#888;font-size:13px;margin-top:4px">列印後發給學生，進行植物尋寶活動</p></div>
+<div class="passport-grid">${passportsHTML}</div>
+</body></html>`;
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'plant-passports.html';
+  a.click();
+}
+
+// ===== HUNT =====
+function renderHunt(){
+  const grid = document.getElementById('hunt-grid');
+  const empty = document.getElementById('hunt-empty');
+  if(!plants.length){ grid.innerHTML=''; empty.classList.remove('hidden'); renderHuntProgress(); return; }
+  empty.classList.add('hidden');
+  grid.innerHTML = plants.map(p=>{
+    const found = huntFound[p.id];
+    return `<div class="hunt-card ${found?'found':''}" onclick="toggleHunt('${p.id}')">
+      <div class="hunt-card-emoji">${found ? p.emoji||'🌿' : '❓'}</div>
+      <div class="hunt-card-name">${found ? p.name : '???'}</div>
+      ${p.hint ? `<div class="hunt-card-hint">${t('hintLabel')} ${p.hint}</div>` : ''}
+      <div class="hunt-card-secret">${p.zone||'—'}</div>
+      ${found ? `<div class="found-badge">✓ ${t('huntFound')}</div>` : `<div style="font-size:10px;color:var(--tx3);margin-top:4px">${t('huntHover')}</div>`}
+    </div>`;
+  }).join('');
+  renderHuntProgress();
+}
+
+function toggleHunt(id){
+  huntFound[id] = !huntFound[id];
+  saveHunt();
+  if(huntFound[id]){
+    const p = plants.find(x=>x.id===id);
+    if(p) showToast(`${p.emoji||'🌿'} ${t('discovered')} ${p.name}`);
+  }
+  renderHunt();
+}
+
+function renderHuntProgress(){
+  const total = plants.length;
+  const found = plants.filter(p=>huntFound[p.id]).length;
+  const pct = total ? Math.round(found/total*100) : 0;
+  document.getElementById('hunt-bar').style.width = pct+'%';
+  document.getElementById('hunt-label').textContent = `${found} / ${total} ${t('huntFound')}`;
+}
+
+function resetHunt(){
+  huntFound = {};
+  saveHunt();
+  renderHunt();
+}
+
+function exportHuntCard(){
+  const html = `<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="UTF-8">
+<title>校園植物尋寶卡</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,Arial,sans-serif;padding:20px;background:#fff}
+h1{font-size:20px;color:#1D9E75;text-align:center;margin-bottom:4px}
+.sub{text-align:center;font-size:12px;color:#888;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{border:1.5px solid #1D9E75;border-radius:10px;padding:12px;text-align:center}
+.num{font-size:10px;color:#888;margin-bottom:4px}
+.emoji{font-size:28px;margin-bottom:6px}
+.name{font-size:13px;font-weight:700;color:#085041;margin-bottom:4px}
+.hint{font-size:11px;color:#888}
+.check{width:24px;height:24px;border:1.5px solid #1D9E75;border-radius:50%;margin:8px auto 0;display:flex;align-items:center;justify-content:center;font-size:14px;color:#1D9E75}
+@media print{body{padding:0}@page{margin:12mm;size:A4}.grid{grid-template-columns:repeat(3,1fr)}}
+</style></head><body>
+<h1>🌿 校園植物尋寶卡</h1>
+<div class="sub">找到所有植物並在格子裡打勾 ✓</div>
+<div class="grid">${plants.map((p,i)=>`
+  <div class="card">
+    <div class="num">#${String(i+1).padStart(2,'0')}</div>
+    <div class="emoji">❓</div>
+    <div class="name">${p.name}</div>
+    <div class="hint">${p.hint ? '🔍 '+p.hint : '📍 '+( p.zone||'校園某處')}</div>
+    <div class="check"></div>
+  </div>`).join('')}
+</div>
+</body></html>`;
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'plant-hunt-card.html';
+  a.click();
+}
+
+// ===== ADD / EDIT FORM =====
+let editingId = null;
+let currentPhotoB64 = null;
+
+function goStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById('step'+i+'-panel').classList.toggle('hidden', i!==n);
+    const item = document.getElementById('step'+i+'-item');
+    item.classList.toggle('active', i===n);
+    item.classList.toggle('done', i<n);
+    document.getElementById('s'+i+'c').textContent = i<n ? '✓' : i;
+  });
+  ['line12','line23'].forEach((id,i)=>{
+    document.getElementById(id).classList.toggle('done', n>i+1);
+  });
+}
+
+function openAddForm(presetX, presetY){
+  editingId = null;
+  currentPhotoB64 = null;
+  clearForm();
+  if(presetX!=null){ document.getElementById('f-mx').value=presetX; document.getElementById('f-my').value=presetY; }
+  if(pendingMapX!=null){ document.getElementById('f-mx').value=pendingMapX; document.getElementById('f-my').value=pendingMapY; pendingMapX=pendingMapY=null; }
+  // reset photo UI
+  document.getElementById('photo-upload-zone').classList.remove('hidden');
+  document.getElementById('photo-preview').classList.add('hidden');
+  document.getElementById('photo-preview').src = '';
+  document.getElementById('ai-loading').classList.add('hidden');
+  document.getElementById('ai-error').classList.add('hidden');
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('photo-input').value = '';
+  // check API key
+  const apiKey = localStorage.getItem('gemini-api-key') || localStorage.getItem('apiKey') || '';
+  document.getElementById('no-api-warn').classList.toggle('hidden', !!apiKey);
+  goStep(1);
+  document.getElementById('form-title').textContent = lang==='en'?'Add Campus Plant':lang==='vi'?'Thêm Cây':'新增校園植物';
+  document.getElementById('form-overlay').classList.remove('hidden');
+}
+
+function triggerPhotoCamera(){
+  const el = document.getElementById('photo-input');
+  el.setAttribute('capture','environment'); el.click();
+}
+function triggerPhotoGallery(){
+  const el = document.getElementById('photo-input');
+  el.removeAttribute('capture'); el.click();
+}
+
+function skipToManual(){
+  clearFormFields();
+  goStep(2);
+}
+
+// Photo input handler
+document.addEventListener('DOMContentLoaded', ()=>{
+  const fi = document.getElementById('photo-input');
+  if(fi) fi.addEventListener('change', e=>{
+    if(!e.target.files[0]) return;
+    handlePhotoFile(e.target.files[0]);
+  });
+  const dz = document.getElementById('photo-upload-zone');
+  if(dz){
+    dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('drag'); });
+    dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
+    dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('drag'); if(e.dataTransfer.files[0]) handlePhotoFile(e.dataTransfer.files[0]); });
+  }
+});
+
+let currentPhotoThumb = null; // compressed data URL for storage
+
+function handlePhotoFile(file){
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    const fullDataUrl = ev.target.result;
+    currentPhotoB64 = fullDataUrl.split(',')[1];
+    document.getElementById('photo-preview').src = fullDataUrl;
+    document.getElementById('photo-preview').classList.remove('hidden');
+    document.getElementById('photo-upload-zone').classList.add('hidden');
+    document.getElementById('analyze-btn').disabled = false;
+    document.getElementById('ai-error').classList.add('hidden');
+    // Compress to thumbnail for storage (~400px wide, JPEG 0.72)
+    const img = new Image();
+    img.onload = ()=>{
+      const maxW = 400, maxH = 300;
+      let w = img.width, h = img.height;
+      if(w > maxW){ h = h * maxW / w; w = maxW; }
+      if(h > maxH){ w = w * maxH / h; h = maxH; }
+      const c = document.createElement('canvas');
+      c.width = Math.round(w); c.height = Math.round(h);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      currentPhotoThumb = c.toDataURL('image/jpeg', 0.72);
+    };
+    img.src = fullDataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzePhoto(){
+  const apiKey = localStorage.getItem('gemini-api-key') || localStorage.getItem('apiKey') || '';
+  if(!apiKey){ alert('請先設定 Gemini API 金鑰'); return; }
+  if(!currentPhotoB64){ alert('請先選擇照片'); return; }
+
+  document.getElementById('ai-loading').classList.remove('hidden');
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('ai-error').classList.add('hidden');
+
+  const msgs = ['正在辨識植物...','Identifying plant...','Đang nhận diện...'];
+  let mi=0;
+  const iv = setInterval(()=>{ document.getElementById('ai-status-txt').textContent = msgs[mi++%msgs.length]; }, 1800);
+
+  const langStr = lang==='en'?'English':lang==='vi'?'Vietnamese':'Traditional Chinese';
+  const prompt = `You are a botanist expert. Identify this plant and return ONLY a JSON object (no markdown) in ${langStr} for all text values:
+{
+  "name": "common name",
+  "latin": "scientific name",
+  "emoji": "one representative emoji",
+  "confidence": "high/medium/low",
+  "category": "one of: 喬木/灌木/花卉/藤蔓/蕨類/草本/其他",
+  "sun": "sunlight requirements (1 sentence)",
+  "water": "watering frequency (1 sentence)",
+  "desc": "2-sentence introduction",
+  "careData": {
+    "origin": "place of origin",
+    "lifecycle": "annual/biennial/perennial",
+    "plantSeason": "best planting season",
+    "temperature": "ideal temperature range",
+    "soil": "soil requirements",
+    "fertilizer": "fertilizing schedule",
+    "naturalFertilizer": ["tip 1 with specific material","tip 2","tip 3"],
+    "problems": [
+      {"name":"problem name","severity":"嚴重 or 注意 or 提示","symptoms":"visible symptoms","treatment":"how to treat"},
+      {"name":"problem name 2","severity":"注意","symptoms":"...","treatment":"..."},
+      {"name":"problem name 3","severity":"注意","symptoms":"...","treatment":"..."},
+      {"name":"problem name 4","severity":"注意","symptoms":"...","treatment":"..."},
+      {"name":"problem name 5","severity":"提示","symptoms":"...","treatment":"..."}
+    ],
+    "careCalendar": {
+      "spring": ["task 1","task 2","task 3"],
+      "summer": ["task 1","task 2","task 3"],
+      "autumn": ["task 1","task 2","task 3"],
+      "winter": ["task 1","task 2","task 3"]
+    }
+  }
+}
+If no plant detected: {"error":"no_plant"}. Category must be one of those exact Chinese values regardless of output language. Severity in problems must always be one of: 嚴重, 注意, 提示.`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+    const resp = await fetch(url, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[
+          {inline_data:{mime_type:'image/jpeg', data:currentPhotoB64}},
+          {text:prompt}
+        ]}],
+        generationConfig:{temperature:0.3, maxOutputTokens:2500}
+      })
+    });
+    clearInterval(iv);
+    document.getElementById('ai-loading').classList.add('hidden');
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||'API Error '+resp.status); }
+    const data = await resp.json();
+    const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const result = JSON.parse(raw);
+    if(result.error){ throw new Error('未偵測到植物，請換一張清晰的植物照片'); }
+    fillAIData(result);
+    goStep(2);
+  } catch(err){
+    clearInterval(iv);
+    document.getElementById('ai-loading').classList.add('hidden');
+    document.getElementById('analyze-btn').disabled = false;
+    document.getElementById('ai-error').classList.remove('hidden');
+    document.getElementById('ai-error').textContent = '辨識失敗：' + err.message;
+  }
+}
+
+let pendingCareData = null;
+function fillAIData(r){
+  document.getElementById('ai-emoji').textContent = r.emoji||'🌿';
+  document.getElementById('ai-name-display').textContent = r.name||'';
+  document.getElementById('ai-latin-display').textContent = r.latin||'';
+  const confMap = {high:'辨識度高',medium:'辨識度中',low:'辨識度低'};
+  document.getElementById('ai-conf').textContent = confMap[r.confidence]||r.confidence||'';
+  document.getElementById('f-name').value = r.name||'';
+  document.getElementById('f-latin').value = r.latin||'';
+  document.getElementById('f-emoji').value = r.emoji||'';
+  document.getElementById('f-sun').value = r.sun||'';
+  document.getElementById('f-water').value = r.water||'';
+  document.getElementById('f-desc').value = r.desc||'';
+  pendingCareData = r.careData || null;
+  const catEl = document.getElementById('f-cat');
+  for(let i=0;i<catEl.options.length;i++){
+    if(catEl.options[i].value===r.category){ catEl.selectedIndex=i; break; }
+  }
+}
+
+function clearForm(){
+  clearFormFields();
+  ['f-zone','f-lat','f-lng','f-hint','f-mx','f-my'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+}
+function clearFormFields(){
+  ['f-name','f-latin','f-sun','f-water','f-desc'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-emoji').value = '';
+  document.getElementById('f-cat').selectedIndex = 0;
+}
+
+function closeForm(){ document.getElementById('form-overlay').classList.add('hidden'); pendingMapX=pendingMapY=null; currentPhotoB64=null; currentPhotoThumb=null; }
+function closeFormIfBg(e){ if(e.target.id==='form-overlay') closeForm(); }
+
+function editPlant(id){
+  const p = plants.find(x=>x.id===id);
+  if(!p) return;
+  closeModal();
+  editingId = id;
+  currentPhotoB64 = null;
+  // Skip to step 2 (confirm data) for edits, then step 3
+  document.getElementById('f-name').value = p.name||'';
+  document.getElementById('f-latin').value = p.latin||'';
+  document.getElementById('f-zone').value = p.zone||'';
+  document.getElementById('f-lat').value = p.lat||'';
+  document.getElementById('f-lng').value = p.lng||'';
+  document.getElementById('f-desc').value = p.desc||'';
+  document.getElementById('f-sun').value = p.sun||'';
+  document.getElementById('f-water').value = p.water||'';
+  document.getElementById('f-hint').value = p.hint||'';
+  document.getElementById('f-mx').value = p.mapX!=null?p.mapX:'';
+  document.getElementById('f-my').value = p.mapY!=null?p.mapY:'';
+  document.getElementById('f-emoji').value = p.emoji||'';
+  const catEl = document.getElementById('f-cat');
+  for(let i=0;i<catEl.options.length;i++){ if(catEl.options[i].value===p.category){ catEl.selectedIndex=i; break; } }
+  // Show AI banner with existing data
+  document.getElementById('ai-emoji').textContent = p.emoji||'🌿';
+  document.getElementById('ai-name-display').textContent = p.name||'';
+  document.getElementById('ai-latin-display').textContent = p.latin||'';
+  document.getElementById('ai-conf').textContent = '已存在';
+  document.getElementById('form-title').textContent = lang==='en'?'Edit Plant':lang==='vi'?'Sửa Cây':'編輯植物';
+  goStep(2);
+  document.getElementById('form-overlay').classList.remove('hidden');
+}
+
+function savePlant(){
+  const name = document.getElementById('f-name').value.trim();
+  if(!name){ alert(t('nameRequired')); return; }
+  const plant = {
+    id: editingId || Date.now().toString(),
+    name, latin: document.getElementById('f-latin').value.trim(),
+    category: document.getElementById('f-cat').value,
+    emoji: document.getElementById('f-emoji').value.trim() || categoryEmoji(document.getElementById('f-cat').value),
+    zone: document.getElementById('f-zone').value.trim(),
+    lat: document.getElementById('f-lat').value.trim(),
+    lng: document.getElementById('f-lng').value.trim(),
+    desc: document.getElementById('f-desc').value.trim(),
+    sun: document.getElementById('f-sun').value.trim(),
+    water: document.getElementById('f-water').value.trim(),
+    hint: document.getElementById('f-hint').value.trim(),
+    mapX: document.getElementById('f-mx').value !== '' ? Number(document.getElementById('f-mx').value) : null,
+    mapY: document.getElementById('f-my').value !== '' ? Number(document.getElementById('f-my').value) : null,
+    addedDate: new Date().toISOString().split('T')[0],
+  };
+  // Preserve or set careData and photo
+  if(editingId){
+    const existing = plants.find(p=>p.id===editingId);
+    plant.careData = pendingCareData || (existing && existing.careData) || null;
+    plant.photo = currentPhotoThumb || (existing && existing.photo) || null;
+  } else {
+    plant.careData = pendingCareData || null;
+    plant.photo = currentPhotoThumb || null;
+  }
+  pendingCareData = null;
+  currentPhotoThumb = null;
+  if(editingId){ const idx=plants.findIndex(p=>p.id===editingId); if(idx>=0) plants[idx]=plant; }
+  else plants.push(plant);
+  savePlants();
+  closeForm();
+  renderAll();
+  if(currentTab!=='map') showTab('map');
+}
+
+function deletePlant(id){
+  if(!confirm(t('confirmDelete'))) return;
+  plants = plants.filter(p=>p.id!==id);
+  savePlants();
+  closeModal();
+  renderAll();
+}
+
+function categoryEmoji(cat){
+  const map = {'喬木':'🌳','灌木':'🌿','花卉':'🌸','藤蔓':'🍃','蕨類/草本':'🌱','其他':'🌾',
+    'Tree':'🌳','Shrub':'🌿','Flower':'🌸','Vine':'🍃','Fern/Herb':'🌱','Other':'🌾',
+    'Cây Gỗ':'🌳','Cây Bụi':'🌿','Hoa':'🌸','Dây Leo':'🍃','Dương Xỉ':'🌱','Khác':'🌾'};
+  return map[cat] || '🌿';
+}
+
+// ===== GPS =====
+function getGPS(){
+  if(!navigator.geolocation){ alert(t('gpsError')); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    document.getElementById('f-lat').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('f-lng').value = pos.coords.longitude.toFixed(6);
+  }, ()=>alert(t('gpsError')));
+}
+
+// ===== DETAIL MODAL =====
+let currentPlantId = null;
+let currentModalTab = 'basic';
+
+function switchModalTab(tab){
+  currentModalTab = tab;
+  ['basic','care','problems','calendar'].forEach(id=>{
+    document.getElementById('mpane-'+id).classList.toggle('hidden', id!==tab);
+    document.getElementById('mst-'+id).classList.toggle('active', id===tab);
+  });
+}
+
+function showPlantDetail(id){
+  const p = plants.find(x=>x.id===id);
+  if(!p) return;
+  currentPlantId = id;
+  const heroEmoji = document.getElementById('m-emoji');
+  if(p.photo){
+    heroEmoji.innerHTML = `<img src="${p.photo}" alt="${p.name}" class="modal-hero-photo">`;
+    heroEmoji.style.background = 'none';
+    heroEmoji.style.fontSize = '0';
+  } else {
+    heroEmoji.innerHTML = p.emoji||'🌿';
+    heroEmoji.style.background = '';
+    heroEmoji.style.fontSize = '';
+  }
+  document.getElementById('m-name').textContent = p.name;
+  document.getElementById('m-latin').textContent = p.latin||'';
+  document.getElementById('m-chips').innerHTML = `<span class="chip chip-green">${p.category||''}</span>`;
+
+  // --- 基本資訊 tab ---
+  const cd = p.careData || {};
+  const basicCells = [
+    ['原產地', cd.origin||'—'],
+    ['植物類別', p.category||'—'],
+    ['生長週期', cd.lifecycle||'—'],
+    ['播種季節', cd.plantSeason||'—'],
+  ];
+  document.getElementById('m-basic-grid').innerHTML = basicCells.map(([l,v])=>
+    `<div class="basic-cell"><div class="basic-cell-label">${l}</div><div class="basic-cell-val">${v}</div></div>`
+  ).join('');
+  const locRows = [
+    p.zone ? ['位置', p.zone] : null,
+    p.lat  ? ['GPS', `${p.lat}${p.lng?', '+p.lng:''}`] : null,
+    p.hint ? ['提示', p.hint] : null,
+  ].filter(Boolean);
+  document.getElementById('m-loc-label').style.display = locRows.length ? '' : 'none';
+  document.getElementById('m-loc-info').innerHTML = locRows.map(([k,v])=>
+    `<div class="info-row"><div class="info-key">${k}</div><div class="info-val">${v}</div></div>`
+  ).join('');
+  document.getElementById('m-desc').textContent = p.desc||'';
+
+  // --- 照護方式 tab ---
+  renderCareTab(p);
+
+  // --- 問題診斷 tab ---
+  renderProblemsTab(p);
+
+  // --- 照護日曆 tab ---
+  renderCalendarTab(p);
+
+  switchModalTab('basic');
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+function renderCareTab(p){
+  const cd = p.careData || {};
+  const hasCare = p.sun||p.water||cd.temperature||cd.soil||cd.fertilizer;
+  if(!hasCare){
+    document.getElementById('m-care-content').innerHTML = fetchCareBoxHTML(p.id);
+    return;
+  }
+  const items = [
+    p.sun       ? {icon:'☀️', bg:'#FFF9E6', title:'光照需求', desc:p.sun} : null,
+    p.water     ? {icon:'💧', bg:'#EBF5FB', title:'澆水',     desc:p.water} : null,
+    cd.temperature ? {icon:'🌡️', bg:'#FEF0F0', title:'溫度',  desc:cd.temperature} : null,
+    cd.soil        ? {icon:'🪴', bg:'#F0F9F4', title:'土壤',  desc:cd.soil} : null,
+    cd.fertilizer  ? {icon:'🌱', bg:'#F0F9F4', title:'施肥計畫', desc:cd.fertilizer} : null,
+  ].filter(Boolean);
+  let html = items.map(it=>
+    `<div class="care-item">
+      <div class="care-icon" style="background:${it.bg}">${it.icon}</div>
+      <div><div class="care-title">${it.title}</div><div class="care-desc">${it.desc}</div></div>
+    </div>`
+  ).join('');
+  if(cd.naturalFertilizer && cd.naturalFertilizer.length){
+    html += `<div class="nat-fert-box">
+      <div class="nat-fert-title">🌿 自製天然肥料</div>
+      ${cd.naturalFertilizer.map(s=>`<div class="nat-fert-li"><span>·</span><span>${s}</span></div>`).join('')}
+    </div>`;
+  }
+  if(!hasCare) html += fetchCareBoxHTML(p.id);
+  document.getElementById('m-care-content').innerHTML = html;
+}
+
+function renderProblemsTab(p){
+  const cd = p.careData || {};
+  const problems = cd.problems || [];
+  if(!problems.length){
+    document.getElementById('m-problems-content').innerHTML = fetchCareBoxHTML(p.id);
+    return;
+  }
+  const sevClass = {嚴重:'sev-danger', 注意:'sev-warn', 提示:'sev-info',
+                    Severe:'sev-danger', Warning:'sev-warn', Tip:'sev-info',
+                    'Nghiêm Trọng':'sev-danger'};
+  document.getElementById('m-problems-content').innerHTML = problems.map(pr=>
+    `<div class="problem-item">
+      <div class="problem-name">${pr.name}<span class="${sevClass[pr.severity]||'sev-info'}">${pr.severity}</span></div>
+      ${pr.symptoms?`<div class="problem-line"><b>症狀：</b>${pr.symptoms}</div>`:''}
+      ${pr.treatment?`<div class="problem-line"><b>處理：</b>${pr.treatment}</div>`:''}
+    </div>`
+  ).join('');
+}
+
+function renderCalendarTab(p){
+  const cd = p.careData || {};
+  const cal = cd.careCalendar;
+  if(!cal || !Object.keys(cal).length){
+    document.getElementById('m-calendar-content').innerHTML = fetchCareBoxHTML(p.id);
+    return;
+  }
+  const seasons = [
+    {key:'spring', label:'🌸 春季', months:'3–5 月'},
+    {key:'summer', label:'☀️ 夏季', months:'6–8 月'},
+    {key:'autumn', label:'🍂 秋季', months:'9–11 月'},
+    {key:'winter', label:'❄️ 冬季', months:'12–2 月'},
+  ];
+  document.getElementById('m-calendar-content').innerHTML = seasons.map(s=>{
+    const tasks = cal[s.key] || [];
+    if(!tasks.length) return '';
+    return `<div class="season-block">
+      <div class="season-title">${s.label} <span style="font-size:11px;font-weight:400;color:var(--tx3)">${s.months}</span></div>
+      <ul class="season-tasks">${tasks.map(t=>`<li>${t}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+}
+
+function fetchCareBoxHTML(plantId){
+  const apiKey = localStorage.getItem('gemini-api-key')||localStorage.getItem('apiKey')||'';
+  if(!apiKey){
+    return `<div class="fetch-care-box">
+      <div class="empty-icon">🔑</div>
+      <div class="empty-t">尚無照護資料</div>
+      <div class="empty-s">請先至「設定」頁面輸入 Gemini API 金鑰，即可自動取得詳細照護資訊。</div>
+      <button class="btn" onclick="showTab('settings')">前往設定 →</button>
+    </div>`;
+  }
+  return `<div class="fetch-care-box">
+    <div class="empty-icon">🌿</div>
+    <div class="empty-t">尚無照護資料</div>
+    <div class="empty-s">點擊下方按鈕，讓 AI 自動查詢詳細照護資訊。</div>
+    <button class="btn primary" onclick="fetchCareData('${plantId}')">🔍 AI 查詢照護資訊</button>
+  </div>`;
+}
+
+async function fetchCareData(plantId){
+  const p = plants.find(x=>x.id===plantId);
+  if(!p) return;
+  const apiKey = localStorage.getItem('gemini-api-key')||localStorage.getItem('apiKey')||'';
+  if(!apiKey){ alert('請先設定 Gemini API 金鑰'); return; }
+  const btn = event.target;
+  btn.disabled = true; btn.textContent = '查詢中...';
+  const langStr = lang==='en'?'English':lang==='vi'?'Vietnamese':'Traditional Chinese';
+  const prompt = `You are a botanist expert. For the plant "${p.name}" (${p.latin||''}), return ONLY a JSON object (no markdown) in ${langStr}:
+{
+  "origin": "place of origin",
+  "lifecycle": "annual/biennial/perennial etc",
+  "plantSeason": "best planting season",
+  "temperature": "ideal temperature range",
+  "soil": "soil requirements",
+  "fertilizer": "fertilizing schedule",
+  "naturalFertilizer": ["tip 1 with specific material and usage","tip 2","tip 3"],
+  "problems": [
+    {"name":"problem name","severity":"嚴重 or 注意 or 提示","symptoms":"visible symptoms","treatment":"how to treat"},
+    {"name":"problem name 2","severity":"...","symptoms":"...","treatment":"..."},
+    {"name":"problem name 3","severity":"...","symptoms":"...","treatment":"..."},
+    {"name":"problem name 4","severity":"...","symptoms":"...","treatment":"..."},
+    {"name":"problem name 5","severity":"...","symptoms":"...","treatment":"..."}
+  ],
+  "careCalendar": {
+    "spring": ["task 1","task 2","task 3"],
+    "summer": ["task 1","task 2","task 3"],
+    "autumn": ["task 1","task 2","task 3"],
+    "winter": ["task 1","task 2","task 3"]
+  }
+}
+Severity must be one of: 嚴重, 注意, 提示 (use these exact Chinese values regardless of language for the severity field).`;
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+    const resp = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1200}})});
+    if(!resp.ok) throw new Error('API Error '+resp.status);
+    const data = await resp.json();
+    const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const cd = JSON.parse(raw);
+    p.careData = cd;
+    savePlants();
+    renderCareTab(p);
+    renderProblemsTab(p);
+    renderCalendarTab(p);
+    // Re-render basic grid with new origin/lifecycle data
+    const basicCells = [
+      ['原產地', cd.origin||'—'],['植物類別', p.category||'—'],
+      ['生長週期', cd.lifecycle||'—'],['播種季節', cd.plantSeason||'—'],
+    ];
+    document.getElementById('m-basic-grid').innerHTML = basicCells.map(([l,v])=>
+      `<div class="basic-cell"><div class="basic-cell-label">${l}</div><div class="basic-cell-val">${v}</div></div>`
+    ).join('');
+    showToast('✅ 照護資料已更新！');
+  } catch(err){
+    btn.disabled = false; btn.textContent = '🔍 AI 查詢照護資訊';
+    alert('查詢失敗：'+err.message);
+  }
+}
+
+function closeModal(){ document.getElementById('modal-overlay').classList.add('hidden'); }
+function closeModalIfBg(e){ if(e.target.id==='modal-overlay') closeModal(); }
+
+// ===== DROPDOWNS =====
+function updateCategoryDropdowns(){
+  const cats = [...new Set(plants.map(p=>p.category).filter(Boolean))];
+  const selectors = ['filter-category','passport-filter'];
+  selectors.forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const cur = el.value;
+    el.innerHTML = `<option value="">${id==='filter-category'?'🔍 全部類別':'全部植物'}</option>`;
+    cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; el.appendChild(o); });
+    el.value = cur;
+  });
+}
+
+// ===== TOAST =====
+function showToast(msg){
+  const t2 = document.createElement('div');
+  t2.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1D9E75;color:#fff;padding:10px 20px;border-radius:99px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.2);animation:fadeIn .3s';
+  t2.textContent = msg;
+  document.body.appendChild(t2);
+  setTimeout(()=>t2.remove(), 2500);
+}
+
+// ===== SETTINGS =====
+function initSettings(){
+  const saved = localStorage.getItem('gemini-api-key') || localStorage.getItem('apiKey') || '';
+  const input = document.getElementById('settings-api-input');
+  if(input) input.value = saved;
+}
+function saveApiKey(){
+  const val = document.getElementById('settings-api-input').value.trim();
+  if(val){
+    localStorage.setItem('gemini-api-key', val);
+    alert(t('settingsApiSaved'));
+  } else {
+    localStorage.removeItem('gemini-api-key');
+    localStorage.removeItem('apiKey');
+    alert(t('settingsApiCleared'));
+  }
+}
+function clearAllData(){
+  if(!confirm(t('settingsClearConfirm'))) return;
+  localStorage.removeItem('campus-plants');
+  localStorage.removeItem('campus-hunt');
+  plants = [];
+  huntFound = {};
+  renderAll();
+  showTab('map');
+}
+
+// ===== RENDER ALL =====
+function renderAll(){
+  if(currentTab==='map') renderMap();
+  if(currentTab==='list') renderList();
+  if(currentTab==='passport') renderPassports();
+  if(currentTab==='hunt') renderHunt();
+  updateCategoryDropdowns();
+}
+
+// ===== SAMPLE DATA (if empty) =====
+function loadSampleData(){
+  if(plants.length > 0) return;
+  plants = [
+    {id:'s1',name:'黃金葛',latin:'Epipremnum aureum',category:'藤蔓',emoji:'🍃',
+     zone:'圖書館走廊',lat:'',lng:'',desc:'常見的室內觀葉植物，具有淨化空氣功能。',
+     sun:'半日照',water:'每3天一次',hint:'靠近圖書館入口的牆邊',mapX:25,mapY:30,addedDate:'2026-04-11'},
+    {id:'s2',name:'九重葛',latin:'Bougainvillea',category:'花卉',emoji:'🌸',
+     zone:'校門口',lat:'',lng:'',desc:'熱帶藤本植物，花色鮮豔，常見於台灣與越南校園。',
+     sun:'全日照',water:'每週2次',hint:'校門口的大拱門旁',mapX:70,mapY:20,addedDate:'2026-04-11'},
+    {id:'s3',name:'榕樹',latin:'Ficus microcarpa',category:'喬木',emoji:'🌳',
+     zone:'操場角落',lat:'',lng:'',desc:'台灣常見的大型喬木，氣根發達，樹形壯觀。',
+     sun:'全日照',water:'自然降雨',hint:'操場最大的那棵樹',mapX:50,mapY:65,addedDate:'2026-04-11'},
+  ];
+  savePlants();
+}
+
+// ===== INIT =====
+window.addEventListener('load', ()=>{
+  loadSampleData();
+  applyI18n();
+  initCanvas();
+  renderMap();
+  updateCategoryDropdowns();
+});
+window.addEventListener('resize', ()=>{
+  if(canvas){
+    const w = canvas.parentElement.offsetWidth;
+    canvas.width = w;
+    canvas.height = Math.round(w*0.6);
+    renderMap();
+  }
+});
+
+// ===== PWA SERVICE WORKER =====
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(r=> console.log('SW registered:', r.scope))
+      .catch(e=> console.log('SW error:', e));
+  });
+}
+</script>
+</body>
+</html>

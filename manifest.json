@@ -1,0 +1,36 @@
+{
+  "name": "校園植物地圖",
+  "short_name": "植物地圖",
+  "description": "校園植物互動地圖，支援 AI 拍照辨識、照護方式、問題診斷與校園尋寶",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1D9E75",
+  "orientation": "portrait-primary",
+  "lang": "zh-Hant",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "form_factor": "narrow",
+      "label": "校園植物地圖主畫面"
+    }
+  ]
+}

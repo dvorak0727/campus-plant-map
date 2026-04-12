@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full bleed background (maskable: safe zone is centre 80%) -->
+  <rect width="512" height="512" fill="#1D9E75"/>
+  <!-- Subtle map grid -->
+  <g stroke="rgba(255,255,255,0.10)" stroke-width="2">
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+  </g>
+  <!-- Leaf (centred in safe zone 102-410) -->
+  <path d="M248,110 C316,110 392,168 387,265
+           C382,348 329,408 248,415
+           C197,400 162,357 152,292
+           C202,308 276,289 315,234
+           C271,257 203,263 170,218
+           C164,162 200,110 248,110 Z"
+        fill="white" opacity="0.95"/>
+  <path d="M248,410 Q238,432 232,450"
+        stroke="white" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.95"/>
+  <circle cx="370" cy="368" r="30" fill="white" opacity="0.88"/>
+  <circle cx="370" cy="368" r="15" fill="#1D9E75"/>
+  <circle cx="370" cy="362" r="5" fill="white"/>
+</svg>

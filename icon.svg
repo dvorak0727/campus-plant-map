@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#1D9E75"/>
+  <!-- Subtle map grid -->
+  <g stroke="rgba(255,255,255,0.12)" stroke-width="2">
+    <line x1="128" y1="0" x2="128" y2="512"/>
+    <line x1="256" y1="0" x2="256" y2="512"/>
+    <line x1="384" y1="0" x2="384" y2="512"/>
+    <line x1="0" y1="128" x2="512" y2="128"/>
+    <line x1="0" y1="256" x2="512" y2="256"/>
+    <line x1="0" y1="384" x2="512" y2="384"/>
+  </g>
+  <!-- Leaf shape -->
+  <path d="M248,95 C320,95 400,155 395,258 C390,345 335,408 248,415
+           C195,400 158,355 148,288
+           C200,305 278,285 318,228
+           C272,252 202,258 168,212
+           C162,155 198,95 248,95 Z"
+        fill="white" opacity="0.95"/>
+  <!-- Stem -->
+  <path d="M248,410 Q238,435 232,455"
+        stroke="white" stroke-width="12" stroke-linecap="round" fill="none" opacity="0.95"/>
+  <!-- Map pin (bottom right) -->
+  <circle cx="375" cy="370" r="32" fill="white" opacity="0.9"/>
+  <circle cx="375" cy="370" r="16" fill="#1D9E75"/>
+  <circle cx="375" cy="364" r="6" fill="white"/>
+</svg>
