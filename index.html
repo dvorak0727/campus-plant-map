@@ -16,7 +16,8 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <style>
 /* ===== RESET & BASE ===== */
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
 :root{
   --g50:#E1F5EE;--g100:#9FE1CB;--g200:#5DCAA5;--g400:#1D9E75;--g600:#0F6E56;--g800:#085041;
   --a50:#FAEEDA;--a400:#BA7517;--a800:#633806;
@@ -41,7 +42,9 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 
 /* ===== NAV ===== */
 .nav{position:sticky;top:0;z-index:200;background:var(--bg);border-bottom:.5px solid var(--bd);
-  padding:0 1rem;display:flex;align-items:center;gap:.75rem;height:52px}
+  padding:0 1rem;padding-left:max(1rem,env(safe-area-inset-left));
+  padding-right:max(1rem,env(safe-area-inset-right));
+  display:flex;align-items:center;gap:.75rem;height:52px}
 .nav-logo{font-size:20px}
 .nav-title{font-size:15px;font-weight:700;color:var(--tx);flex:1}
 .lang-btns{display:flex;gap:3px}
@@ -53,7 +56,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .main-tabs{display:flex;overflow-x:auto;border-bottom:.5px solid var(--bd);background:var(--bg);padding:0 1rem}
 .main-tabs::-webkit-scrollbar{height:0}
 .mt{padding:12px 14px;font-size:13px;font-weight:500;color:var(--tx3);
-  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s}
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;
+  touch-action:manipulation;user-select:none}
 .mt.active{color:var(--g400);border-bottom-color:var(--g400)}
 
 /* ===== CONTENT ===== */
@@ -62,7 +66,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 /* ===== BUTTONS ===== */
 .btn{padding:9px 14px;font-size:13px;border-radius:var(--r);border:.5px solid var(--bd2);
   background:var(--bg);color:var(--tx);cursor:pointer;font-family:var(--fn);
-  font-weight:500;transition:background .15s;white-space:nowrap}
+  font-weight:500;transition:background .15s;white-space:nowrap;
+  touch-action:manipulation;user-select:none}
 .btn:hover{background:var(--bg2)}
 .btn.primary{background:var(--g400);color:#fff;border-color:var(--g600)}
 .btn.primary:hover{background:var(--g600)}
@@ -72,7 +77,19 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ===== MAP TAB ===== */
-.map-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.map-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:.5rem;flex-wrap:wrap}
+.place-panel{background:var(--bg2);border:.5px solid var(--bd2);border-radius:var(--rl);
+  padding:.75rem 1rem;margin-bottom:.75rem;display:flex;flex-direction:column;gap:.5rem}
+.place-panel-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.place-panel-sep{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx3)}
+.place-panel-sep::before,.place-panel-sep::after{content:'';flex:1;height:.5px;background:var(--bd2)}
+.place-panel-hint{font-size:11px;color:var(--tx3);margin-top:2px}
+.loc-list-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--bd)}
+.loc-list-item:last-child{border-bottom:none}
+.add-loc-mode-banner{position:fixed;top:94px;left:0;right:0;z-index:250;
+  background:var(--g400);color:#fff;text-align:center;padding:.5rem 1rem;font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:.75rem;cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2)}
 .map-wrap{position:relative;border-radius:var(--rl);overflow:hidden;border:.5px solid var(--bd2);
   background:var(--bg2);margin-bottom:1rem}
 #map-canvas{width:100%;display:block;cursor:crosshair;touch-action:none}
@@ -83,7 +100,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 /* ===== PLANT LIST ===== */
 .plant-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:1rem}
 .plant-card{background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rl);
-  overflow:hidden;cursor:pointer;transition:box-shadow .15s;box-shadow:var(--sh)}
+  overflow:hidden;cursor:pointer;transition:box-shadow .15s;box-shadow:var(--sh);
+  touch-action:manipulation;user-select:none}
 .plant-card:hover{box-shadow:0 4px 20px rgba(0,0,0,0.12)}
 .plant-card-top{background:var(--g50);padding:.85rem;display:flex;align-items:center;gap:10px;
   border-bottom:.5px solid var(--g100)}
@@ -103,32 +121,63 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
   border:.5px solid var(--g100);box-shadow:0 2px 8px rgba(0,0,0,0.12)}
 
 /* ===== PASSPORT ===== */
-.passport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:1rem}
+.passport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px;margin-top:1rem}
 .passport{background:var(--bg);border:2px solid var(--g400);border-radius:var(--rxl);
-  overflow:hidden;position:relative;box-shadow:0 4px 16px rgba(29,158,117,0.15)}
+  overflow:hidden;position:relative;box-shadow:0 4px 16px rgba(29,158,117,0.15);
+  display:flex;flex-direction:column;min-height:480px}
+/* ── Header：左=學校/護照，右=植物名稱 ── */
 .passport-header{background:linear-gradient(135deg,var(--g600),var(--g400));
-  padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem}
-.passport-school{font-size:11px;color:rgba(255,255,255,0.8);letter-spacing:.05em}
-.passport-title{font-size:15px;font-weight:700;color:#fff}
-.passport-number{margin-left:auto;font-size:10px;color:rgba(255,255,255,0.7);font-family:monospace}
-.passport-body{padding:1rem 1.25rem}
-.passport-plant-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.85rem;
-  padding-bottom:.85rem;border-bottom:.5px solid var(--bd)}
-.passport-emoji-box{width:52px;height:52px;background:var(--g50);border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;
-  border:.5px solid var(--g100)}
-.passport-pname{font-size:16px;font-weight:700;color:var(--tx)}
-.passport-platin{font-size:11px;color:var(--tx3);font-style:italic;margin-top:2px}
-.passport-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
-.pf-label{font-size:10px;color:var(--tx3);margin-bottom:2px}
-.pf-val{font-size:12px;font-weight:600;color:var(--tx)}
-.passport-footer{background:var(--g50);padding:.6rem 1.25rem;
+  padding:.75rem 1rem;display:flex;align-items:flex-start;gap:.5rem}
+.passport-header-left{flex-shrink:0}
+.passport-school{font-size:10px;color:rgba(255,255,255,0.72);letter-spacing:.05em}
+.passport-title{font-size:13px;font-weight:700;color:#fff}
+.passport-header-right{margin-left:auto;text-align:right;min-width:0;max-width:65%}
+.pp-hdr-name{font-size:17px;font-weight:700;color:#fff;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-hdr-latin{font-size:10px;color:rgba(255,255,255,0.72);font-style:italic;margin-top:2px}
+.pp-hdr-meta{font-size:9px;color:rgba(255,255,255,0.55);margin-top:2px}
+.passport-number{font-size:9px;color:rgba(255,255,255,0.4);font-family:monospace;margin-top:5px}
+/* ── Visual row：照片並排，無標題 ── */
+.pp-visual-row{display:flex;gap:5px;padding:5px 5px 4px}
+.pp-visual-half{flex:1;min-width:0}
+.pp-plant-photo{width:100%;height:118px;object-fit:cover;border-radius:6px;display:block;
+  border:.5px solid var(--bd)}
+.pp-emoji-ph{width:100%;height:118px;border-radius:6px;border:.5px solid var(--g100);
+  background:var(--g50);display:flex;align-items:center;justify-content:center;font-size:50px}
+.pp-loc-thumb{width:100%;height:118px;object-fit:cover;border-radius:6px;display:block;
+  border:.5px solid var(--bd)}
+.pp-loc-ph{width:100%;height:118px;border-radius:6px;border:.5px solid var(--bd);
+  background:var(--bg3);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;color:var(--tx3);font-size:11px;gap:4px}
+/* ── Body ── */
+.passport-body{padding:.7rem .9rem;flex:1}
+.passport-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.pf-label{font-size:9px;color:var(--tx3);margin-bottom:1px;white-space:nowrap}
+.pf-val{font-size:12px;font-weight:600;color:var(--tx);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  word-break:break-all}
+.pf-section-label{font-size:9px;font-weight:700;color:var(--tx3);letter-spacing:.05em;
+  margin:.45rem 0 .2rem;display:flex;align-items:center;gap:5px}
+.pf-section-label::after{content:'';flex:1;height:.5px;background:var(--bd)}
+.passport-desc{font-size:10px;color:var(--tx2);line-height:1.5;margin-top:.35rem;
+  padding-top:.35rem;border-top:.5px solid var(--bd);
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+/* ── Footer ── */
+.passport-footer{background:var(--g50);padding:.5rem .9rem;
   display:flex;align-items:center;justify-content:space-between;border-top:.5px solid var(--g100)}
 .passport-loc-text{font-size:11px;color:var(--g600);font-weight:500}
-.passport-qr{width:36px;height:36px;background:var(--bg);border-radius:4px;
-  display:flex;align-items:center;justify-content:center;font-size:20px}
-.passport-stamp{position:absolute;top:50%;right:12px;transform:translateY(-50%) rotate(15deg);
-  font-size:36px;opacity:.07;pointer-events:none}
+.passport-qr{font-size:18px}
+.passport-stamp{position:absolute;top:50%;right:10px;transform:translateY(-50%) rotate(15deg);
+  font-size:36px;opacity:.06;pointer-events:none}
+/* ── 列印固定尺寸 ── */
+@media print{
+  @page{size:A4 portrait;margin:10mm}
+  .passport-grid{grid-template-columns:repeat(2,1fr)!important;gap:6px!important}
+  .passport{min-height:0!important;height:133mm!important;
+    break-inside:avoid;page-break-inside:avoid;box-shadow:none!important}
+  .pp-plant-photo,.pp-loc-thumb,.pp-emoji-ph,.pp-loc-ph,
+  .passport-header{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+}
 
 /* ===== TREASURE HUNT ===== */
 .hunt-header{background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
@@ -139,17 +188,33 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .hunt-progress-fill{background:var(--g200);height:100%;border-radius:99px;transition:width .5s}
 .hunt-progress-label{font-size:12px;margin-top:.5rem;opacity:.8}
 
-.hunt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:1rem}
+.hunt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:1rem}
 .hunt-card{background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rl);
-  padding:.85rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.hunt-card:hover{transform:translateY(-2px);box-shadow:var(--sh)}
+  padding:.9rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;
+  touch-action:manipulation;user-select:none}
+.hunt-card:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.10)}
 .hunt-card.found{border-color:var(--g400);background:var(--g50)}
-.hunt-card.found::after{content:'✓';position:absolute;top:6px;right:8px;
+.hunt-card.found::after{content:'✓';position:absolute;top:8px;right:10px;
   color:var(--g400);font-weight:700;font-size:14px}
-.hunt-card-emoji{font-size:32px;margin-bottom:.5rem}
-.hunt-card-name{font-size:12px;font-weight:600;color:var(--tx)}
-.hunt-card-hint{font-size:11px;color:var(--tx3);margin-top:3px}
-.hunt-card-secret{font-size:11px;color:var(--tx3);margin-top:3px;
+.hunt-card-emoji{font-size:32px;margin-bottom:.4rem}
+.hunt-card-name{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:.35rem}
+.hunt-card-hint{font-size:11px;color:var(--tx3);margin-top:4px}
+
+/* 謎語文字 */
+.hunt-riddle{font-size:11.5px;color:var(--tx2);font-style:italic;line-height:1.55;
+  margin:.45rem 0;padding:.45rem .6rem;background:var(--bg2);border-radius:6px;
+  text-align:left;border-left:2px solid var(--g200)}
+
+/* 花語 / 俗語 / 趣聞 行列 */
+.hunt-clue-row{display:flex;align-items:flex-start;gap:5px;font-size:11px;
+  color:var(--tx2);margin-top:5px;text-align:left;line-height:1.45;
+  transition:filter .3s;user-select:none}
+.hunt-clue-row b{color:var(--tx3);font-weight:600;flex-shrink:0}
+.hunt-blur{filter:blur(5px)}
+.hunt-card:hover .hunt-blur{filter:blur(0)}
+
+/* 位置秘密（hover 解鎖）*/
+.hunt-card-secret{font-size:11px;color:var(--tx3);margin-top:5px;
   filter:blur(4px);transition:filter .3s;user-select:none}
 .hunt-card:hover .hunt-card-secret{filter:blur(0)}
 
@@ -161,7 +226,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .form-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
   display:flex;align-items:flex-end;justify-content:center}
 .form-sheet{background:var(--bg);border-radius:var(--rxl) var(--rxl) 0 0;
-  width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:1.5rem}
+  width:100%;max-width:600px;max-height:92vh;overflow-y:auto;
+  padding:1.5rem 1.5rem max(1.5rem,env(safe-area-inset-bottom))}
 .form-handle{width:36px;height:4px;background:var(--bd2);border-radius:99px;margin:0 auto 1rem}
 .form-title{font-size:17px;font-weight:700;color:var(--tx);margin-bottom:1.25rem}
 .form-row{margin-bottom:1rem}
@@ -247,6 +313,21 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .photo-upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .photo-preview-img{width:100%;max-height:200px;object-fit:cover;border-radius:var(--r);margin-bottom:.75rem;border:.5px solid var(--bd)}
 
+/* ===== CROP UI ===== */
+.crop-wrap{margin-bottom:.75rem}
+.crop-bar{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx3);margin-bottom:.35rem}
+.crop-container{position:relative;width:100%;height:220px;overflow:hidden;
+  border-radius:var(--rl);border:2px solid var(--g400);cursor:grab;
+  background:#111;touch-action:none;user-select:none;-webkit-user-select:none}
+.crop-container.dragging{cursor:grabbing}
+.crop-img{position:absolute;pointer-events:none;user-select:none;-webkit-user-select:none;display:block;max-width:none}
+.crop-guide{position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px) 0 0/33.33% 33.33%,
+    linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px) 0 0/33.33% 33.33%;
+  border-radius:var(--rl)}
+.crop-hint{font-size:10px;color:var(--tx3);text-align:center;margin-top:.3rem}
+
 .ai-loading{text-align:center;padding:2rem}
 .ai-spinner{width:36px;height:36px;border:3px solid var(--bd2);border-top-color:var(--g400);
   border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
@@ -263,6 +344,62 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .field-ai-tag{font-size:10px;background:var(--g50);color:var(--g600);padding:1px 6px;
   border-radius:99px;margin-left:4px;font-weight:600}
 
+/* ── 信心度進度條 ── */
+.conf-bar-wrap{display:flex;align-items:center;gap:8px;margin:.55rem 0 .25rem}
+.conf-bar-track{flex:1;height:8px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.conf-bar-fill{height:100%;border-radius:99px;transition:width .5s ease}
+.conf-bar-fill.high{background:var(--g400)}
+.conf-bar-fill.mid{background:var(--y400)}
+.conf-bar-fill.low{background:var(--r400)}
+.conf-bar-pct{font-size:11px;font-weight:700;width:36px;text-align:right;flex-shrink:0}
+.conf-bar-pct.high{color:var(--g600)}
+.conf-bar-pct.mid{color:var(--a400)}
+.conf-bar-pct.low{color:var(--r400)}
+.conf-label{font-size:11px;color:var(--tx3);margin-bottom:.1rem}
+
+/* ── AI 觀察到的特徵 ── */
+.ai-features-box{background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r);
+  padding:.6rem .85rem;margin:.5rem 0 .75rem;font-size:12px;color:var(--tx2);line-height:1.65}
+.ai-features-box b{color:var(--g600);font-weight:600}
+
+/* ── 備選物種卡片 ── */
+.ai-alt-wrap{margin:.6rem 0 .85rem}
+.ai-alt-title{font-size:11px;color:var(--tx3);margin-bottom:.4rem;display:flex;align-items:center;gap:4px}
+.ai-alt-list{display:flex;flex-wrap:wrap;gap:6px}
+.ai-alt-btn{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:var(--r);
+  border:.5px solid var(--bd2);background:var(--bg);cursor:pointer;font-size:12px;color:var(--tx);
+  font-family:var(--fn);transition:all .15s;text-align:left}
+.ai-alt-btn:hover{border-color:var(--g400);background:var(--g50)}
+.ai-alt-btn .alt-pct{font-size:10px;color:var(--tx3);background:var(--bg3);
+  padding:1px 6px;border-radius:99px;flex-shrink:0}
+
+/* ── 唯讀展示模式橫幅 ── */
+.readonly-banner{background:var(--g400);color:#fff;padding:7px 1rem;
+  font-size:12px;display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+.readonly-banner a{color:rgba(255,255,255,0.85);text-decoration:underline;font-size:11px}
+
+/* ── GitHub 一鍵同步 ── */
+.gh-sync-box{background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--rl);
+  padding:1rem 1.25rem;margin-bottom:1rem}
+.gh-field-row{display:flex;align-items:center;gap:8px;margin-bottom:.55rem}
+.gh-field-row label{font-size:12px;color:var(--tx2);width:52px;flex-shrink:0}
+.gh-token-guide{background:var(--b50);border:.5px solid var(--b400);border-radius:var(--r);
+  padding:.7rem 1rem;font-size:11.5px;color:var(--b800);line-height:1.85;margin:.6rem 0}
+.gh-token-guide a{color:var(--b400)}
+.gh-status{font-size:12px;margin-top:.6rem;padding:.5rem .75rem;border-radius:var(--r);
+  min-height:1.5em;line-height:1.6}
+.gh-status.ok{background:var(--g50);color:var(--g600)}
+.gh-status.err{background:var(--r50);color:var(--r400)}
+.gh-status.loading{color:var(--tx3)}
+.gh-status a{color:var(--g600);font-weight:600}
+
+/* ── 分享說明區塊 ── */
+.share-steps{background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--rl);
+  padding:1rem 1.25rem;margin-bottom:1rem;font-size:12px;color:var(--tx2);line-height:2}
+.share-steps b{color:var(--tx);font-weight:700}
+.share-steps code{background:var(--bg3);padding:1px 6px;border-radius:4px;
+  font-family:monospace;font-size:11px;color:var(--g600)}
+
 .no-api-key{background:var(--a50);border:.5px solid var(--a400);border-radius:var(--r);
   padding:.85rem 1rem;font-size:13px;color:var(--a800);margin-bottom:1rem;line-height:1.6}
 
@@ -270,10 +407,28 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 .modal-subtabs{display:flex;border-bottom:.5px solid var(--bd);padding:0 1.25rem;overflow-x:auto}
 .modal-subtabs::-webkit-scrollbar{height:0}
 .mst{padding:10px 12px;font-size:13px;font-weight:500;color:var(--tx3);
-  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;
+  touch-action:manipulation;user-select:none}
 .mst.active{color:var(--g400);border-bottom-color:var(--g400)}
 
-/* ===== CARE ITEMS ===== */
+/* ===== CARE SECTIONS (5 大分類) ===== */
+.care-section{border:.5px solid var(--bd);border-radius:var(--rl);margin-bottom:.75rem;overflow:hidden}
+.care-section-header{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;background:var(--bg2)}
+.care-section-icon{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;
+  justify-content:center;font-size:20px;flex-shrink:0}
+.care-section-meta{flex:1}
+.care-section-title{font-size:13px;font-weight:700;color:var(--tx)}
+.care-section-sub{font-size:11px;color:var(--g600);margin-top:2px;font-weight:500}
+.care-section-body{padding:.75rem 1rem;border-top:.5px solid var(--bd)}
+.care-tip-row{font-size:12px;color:var(--tx2);line-height:1.7;padding:2px 0;display:flex;gap:5px}
+.care-tip-row b{color:var(--tx);font-weight:600;flex-shrink:0}
+.care-tip-row span{flex:1}
+.care-tip-sub{font-size:11px;color:var(--tx3);padding:2px 0 2px 20px;line-height:1.5}
+.care-plant-note{font-size:12px;background:var(--g50);border:.5px solid var(--g100);
+  border-radius:var(--r);padding:.5rem .75rem;margin-top:.5rem;color:var(--g800);line-height:1.6}
+.care-plant-note-label{font-size:10px;font-weight:700;color:var(--g600);margin-bottom:2px;letter-spacing:.02em}
+
+/* ===== LEGACY CARE ITEMS (kept for compatibility) ===== */
 .care-item{display:flex;gap:.75rem;padding:.85rem 0;border-bottom:.5px solid var(--bd)}
 .care-item:last-child{border-bottom:none}
 .care-icon{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;
@@ -320,6 +475,12 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 </head>
 <body>
 
+<!-- 唯讀展示橫幅（只在 GitHub Pages 部署版顯示） -->
+<div id="readonly-banner" class="readonly-banner hidden">
+  📖 展示模式 · 資料由老師維護，歡迎觀看但無法新增
+  <a href="mailto:">聯絡老師</a>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <span class="nav-logo">🗺️</span>
@@ -333,10 +494,11 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 
 <!-- MAIN TABS -->
 <div class="main-tabs">
-  <div class="mt active" onclick="showTab('map')"    id="tab-map">🗺️ 植物地圖</div>
-  <div class="mt"        onclick="showTab('list')"   id="tab-list">🌿 植物清單</div>
+  <div class="mt active" onclick="showTab('map')"      id="tab-map">🗺️ 植物地圖</div>
+  <div class="mt"        onclick="showTab('list')"     id="tab-list">🌿 植物清單</div>
   <div class="mt"        onclick="showTab('passport')" id="tab-passport">📘 植物護照</div>
-  <div class="mt"        onclick="showTab('hunt')"   id="tab-hunt">🏆 校園尋寶</div>
+  <div class="mt"        onclick="showTab('diagnose')" id="tab-diagnose">🔬 問題診斷</div>
+  <div class="mt"        onclick="showTab('hunt')"     id="tab-hunt">🏆 校園尋寶</div>
   <div class="mt"        onclick="showTab('settings')" id="tab-settings">⚙️ 設定</div>
 </div>
 
@@ -349,6 +511,34 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
     <select class="btn" id="filter-category" onchange="renderMap()" style="cursor:pointer">
       <option value="">🔍 全部類別</option>
     </select>
+  </div>
+
+  <!-- ── 放置模式選單 ── -->
+  <div id="place-panel" class="place-panel hidden">
+    <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:.1rem">📍 選擇放置方式</div>
+    <div class="place-panel-row">
+      <button class="btn primary" onclick="startNewPlantMode()">🌱 點擊地圖新增全新植物</button>
+      <span style="font-size:12px;color:var(--tx3)">點擊後再點地圖</span>
+    </div>
+    <div class="place-panel-sep">或</div>
+    <div class="place-panel-row">
+      <span style="font-size:12px;color:var(--tx);white-space:nowrap">📌 放置已有植物：</span>
+      <select class="form-input" id="place-plant-select" style="flex:1;min-width:120px;font-size:13px;padding:7px 10px">
+        <option value="">── 選擇植物 ──</option>
+      </select>
+      <select class="form-input" id="place-zone-select" style="width:120px;font-size:13px;padding:7px 10px">
+        <option value="">📍 區域（可選）</option>
+      </select>
+      <button class="btn primary" onclick="confirmPlaceFromList()">放置 →</button>
+    </div>
+    <div class="place-panel-hint" id="place-panel-hint">選擇植物後點擊地圖，將它放到對應位置。清單只顯示尚未在地圖上的植物。</div>
+    <button class="btn" onclick="hidePlacePanel()" style="align-self:flex-start;font-size:12px;margin-top:.1rem">✕ 取消</button>
+  </div>
+
+  <!-- ── 放置中狀態橫幅 ── -->
+  <div id="place-mode-banner" class="add-loc-mode-banner hidden" onclick="cancelAddMode()">
+    <span id="place-mode-banner-text">📍 點擊地圖放置植物</span>
+    <span style="opacity:.8;font-size:12px">（點此取消）</span>
   </div>
 
   <div class="stats-row">
@@ -402,6 +592,60 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
   </div>
 </div>
 
+<!-- ===================== DIAGNOSE TAB ===================== -->
+<div id="pane-diagnose" class="content hidden">
+  <div style="margin-bottom:1.25rem">
+    <div style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:.35rem">🔬 植物問題快速診斷</div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.6">
+      不確定是什麼植物也沒關係。拍一張有問題的植物照片，AI 同時幫你<b>辨識植物</b>＋<b>診斷病蟲害</b>，並給出處理建議。
+    </div>
+  </div>
+
+  <!-- Upload zone -->
+  <div class="photo-upload-zone" id="diag-zone" onclick="document.getElementById('diag-file').click()" style="margin-bottom:.75rem">
+    <input type="file" id="diag-file" accept="image/*" capture="environment" style="display:none" onchange="diagLoadPhoto(this)">
+    <div style="font-size:32px;margin-bottom:.5rem">📷</div>
+    <div style="font-size:14px;font-weight:600;color:var(--tx2)">點擊拍照 / 選擇照片</div>
+    <div style="font-size:12px;color:var(--tx3);margin-top:.25rem">拍下有問題的葉片或整株植物</div>
+  </div>
+  <img id="diag-preview" style="display:none;width:100%;max-height:240px;object-fit:cover;border-radius:var(--rl);margin-bottom:.75rem;border:.5px solid var(--bd)">
+
+  <button id="diag-btn" class="btn primary full" onclick="runDiagnose()" style="display:none;margin-bottom:1rem">🔬 開始 AI 診斷</button>
+
+  <!-- Loading -->
+  <div id="diag-loading" class="hidden" style="text-align:center;padding:2rem">
+    <div class="ai-spinner"></div>
+    <div class="ai-status" id="diag-status">AI 正在分析植物與病徵…</div>
+  </div>
+
+  <!-- Error -->
+  <div id="diag-error" class="hidden" style="background:var(--r50);border:.5px solid var(--r400);border-radius:var(--r);padding:.85rem 1rem;font-size:13px;color:var(--r800);margin-bottom:.75rem"></div>
+
+  <!-- Result -->
+  <div id="diag-result" class="hidden">
+    <!-- Plant ID -->
+    <div id="diag-plant-banner" style="background:var(--g50);border:.5px solid var(--g100);border-radius:var(--rl);padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+      <div id="diag-emoji" style="font-size:32px;width:52px;height:52px;background:var(--g100);border-radius:var(--r);display:flex;align-items:center;justify-content:center;flex-shrink:0">🌿</div>
+      <div style="flex:1">
+        <div id="diag-pname" style="font-size:16px;font-weight:700;color:var(--g800)"></div>
+        <div id="diag-platin" style="font-size:12px;color:var(--g600);font-style:italic;margin-top:2px"></div>
+        <div id="diag-summary" style="font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5"></div>
+      </div>
+      <div id="diag-conf" style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--g200);color:var(--g800);flex-shrink:0"></div>
+    </div>
+    <!-- Healthy banner (no problems) -->
+    <div id="diag-healthy" class="hidden" style="background:var(--g50);border:.5px solid var(--g400);border-radius:var(--rl);padding:1.25rem;text-align:center;margin-bottom:1rem">
+      <div style="font-size:32px;margin-bottom:.5rem">✅</div>
+      <div style="font-size:15px;font-weight:700;color:var(--g800)">植物看起來健康！</div>
+      <div style="font-size:13px;color:var(--g600);margin-top:.35rem">目前沒有偵測到明顯的病蟲害或異常。</div>
+    </div>
+    <!-- Problems list -->
+    <div id="diag-problems-list"></div>
+    <!-- Retry -->
+    <button class="btn full" onclick="diagReset()" style="margin-top:.5rem">🔄 重新診斷</button>
+  </div>
+</div>
+
 <!-- ===================== HUNT TAB ===================== -->
 <div id="pane-hunt" class="content hidden">
   <div class="hunt-header">
@@ -412,7 +656,8 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
   </div>
   <div class="btn-row" style="margin-bottom:1rem">
     <button class="btn" onclick="resetHunt()">🔄 <span data-i="resetHunt">重置進度</span></button>
-    <button class="btn primary" onclick="exportHuntCard()">📄 <span data-i="exportHunt">下載尋寶卡</span></button>
+    <button class="btn primary" id="gen-riddle-btn" onclick="generateHuntRiddles()">✨ AI 生成謎語</button>
+    <button class="btn" onclick="exportHuntCard()">📄 <span data-i="exportHunt">下載尋寶卡</span></button>
   </div>
   <div id="hunt-grid" class="hunt-grid"></div>
   <div id="hunt-empty" class="empty hidden">
@@ -440,7 +685,95 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
     <div style="font-size:11px;color:var(--tx3);margin-top:.5rem;text-align:center" data-i="settingsPrivacy">金鑰僅存在你的裝置（localStorage），不上傳任何伺服器。</div>
   </div>
 
-  <div class="sec-title" style="margin-top:1.5rem" data-i="settingsDataTitle">資料管理</div>
+  <!-- ── 校園地圖設定 ── -->
+  <div class="sec-title" style="margin-top:1.5rem">🗺️ 校園地圖設定</div>
+  <div style="background:var(--bg2);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:.35rem">📷 校園地圖圖片</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:.75rem">上傳學校衛星照或平面圖（建議橫向），植物標記將直接疊加在圖片上。</div>
+    <img id="map-img-preview" src="" alt="" style="display:none;width:100%;max-height:160px;object-fit:cover;border-radius:var(--r);border:.5px solid var(--bd);margin-bottom:.6rem">
+    <input type="file" id="map-img-file" accept="image/*" style="display:none" onchange="uploadMapImage()">
+    <div class="btn-row">
+      <button class="btn primary" onclick="document.getElementById('map-img-file').click()">📷 上傳地圖圖片</button>
+      <button class="btn" onclick="clearMapImage()">🗑️ 清除圖片</button>
+    </div>
+  </div>
+
+  <!-- ── 校園區域設定 ── -->
+  <div style="background:var(--bg2);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem">
+    <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:.35rem">📍 校園區域清單</div>
+    <div style="font-size:12px;color:var(--tx3);margin-bottom:.75rem">每行一個區域名稱，新增植物時可從下拉選單快速選擇。</div>
+    <textarea id="zones-textarea" class="form-input" rows="7"
+      style="resize:vertical;line-height:2;font-size:13px"></textarea>
+    <button class="btn primary full" style="margin-top:.6rem" onclick="saveZonesSettings()">💾 儲存區域設定</button>
+  </div>
+
+  <!-- ── 一鍵同步到 GitHub ── -->
+  <div class="sec-title" style="margin-top:1.5rem">🚀 一鍵同步到 GitHub Pages</div>
+  <div class="gh-sync-box">
+
+    <!-- Token 申請說明（可收合） -->
+    <details style="margin-bottom:.75rem">
+      <summary style="font-size:12px;font-weight:600;color:var(--g600);cursor:pointer">
+        🔑 如何取得 GitHub Token？（點此展開）
+      </summary>
+      <div class="gh-token-guide">
+        <b>Step 1</b> 登入 GitHub → 右上角頭像 → <b>Settings</b><br>
+        <b>Step 2</b> 左側最底部 → <b>Developer settings</b><br>
+        <b>Step 3</b> <b>Personal access tokens → Fine-grained tokens</b><br>
+        <b>Step 4</b> <b>Generate new token</b>，填寫：<br>
+        &nbsp;&nbsp;• Token name：plant-map-sync（隨意）<br>
+        &nbsp;&nbsp;• Expiration：No expiration 或 1 year<br>
+        &nbsp;&nbsp;• Repository access：<b>Only select repositories</b> → 選你的 campus-plant-map<br>
+        &nbsp;&nbsp;• Permissions → Contents → <b>Read and write</b><br>
+        <b>Step 5</b> Generate → 複製 token（只顯示一次！）貼到下方
+      </div>
+    </details>
+
+    <div class="gh-field-row">
+      <label>帳號</label>
+      <input class="form-input" id="gh-owner" placeholder="例：dvorak0727" style="flex:1">
+    </div>
+    <div class="gh-field-row">
+      <label>Repo</label>
+      <input class="form-input" id="gh-repo" placeholder="例：campus-plant-map" style="flex:1">
+    </div>
+    <div class="gh-field-row">
+      <label>Token</label>
+      <input class="form-input" id="gh-token" type="password" placeholder="github_pat_…" style="flex:1">
+    </div>
+
+    <button class="btn full" onclick="saveGitHubSettings()" style="margin-bottom:.5rem">
+      💾 儲存設定
+    </button>
+    <button class="btn primary full" onclick="publishToGitHub()" id="gh-sync-btn">
+      🚀 立即同步到 GitHub Pages
+    </button>
+    <div id="gh-status" class="gh-status"></div>
+  </div>
+
+  <!-- ── 分享到網路（GitHub Pages）── -->
+  <div class="sec-title" style="margin-top:1.5rem">🌐 分享到網路（免費）</div>
+  <div class="share-steps">
+    把植物地圖分享給學生、家長或任何人，只需三個步驟：<br>
+    <b>Step 1</b> 按下方「匯出資料」，下載 <code>campus-plant-data.json</code><br>
+    <b>Step 2</b> 前往 <a href="https://github.com" target="_blank" style="color:var(--g600)">github.com</a>
+      建立免費帳號，新增一個 Public 儲存庫<br>
+    <b>Step 3</b> 上傳以下三個檔案到儲存庫根目錄：<br>
+    &nbsp;&nbsp;• <code>index.html</code>（本程式主檔）<br>
+    &nbsp;&nbsp;• <code>campus-plant-data.json</code>（你的植物資料）<br>
+    &nbsp;&nbsp;• <code>manifest.json</code> · <code>icon.svg</code>（PWA 圖示）<br>
+    <b>Step 4</b> 到 Settings → Pages → Branch: main → Save<br>
+    完成！網址：<code>https://你的名字.github.io/儲存庫名稱/</code><br><br>
+    🔄 <b>更新資料</b>：每次修改植物後，重新匯出 JSON 並上傳覆蓋即可。
+  </div>
+  <button class="btn primary full" onclick="exportSharedData()" style="margin-bottom:.5rem">
+    📦 匯出植物資料（campus-plant-data.json）
+  </button>
+  <div style="font-size:11px;color:var(--tx3);text-align:center;margin-bottom:1rem">
+    目前共 <span id="export-count">0</span> 株植物 · 含地圖圖片與區域設定
+  </div>
+
+  <div class="sec-title" style="margin-top:1rem" data-i="settingsDataTitle">資料管理</div>
   <button class="btn danger full" onclick="clearAllData()"><span data-i="settingsClearAll">清除所有資料</span></button>
 
   <div style="margin-top:1.5rem;padding:.85rem 1rem;background:var(--bg2);border-radius:var(--r);font-size:11px;color:var(--tx3);text-align:center">
@@ -488,6 +821,20 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
       </div>
       <img id="photo-preview" class="photo-preview-img hidden" src="" alt="">
 
+      <!-- ── 裁切 UI（照片選擇後顯示）── -->
+      <div id="crop-ui" class="crop-wrap hidden">
+        <div class="crop-bar">
+          <span>✂️ 拖移照片來調整構圖</span>
+          <button class="btn" style="padding:2px 8px;font-size:11px;margin-left:auto" onclick="resetCrop()">⟳ 置中</button>
+          <button class="btn" style="padding:2px 8px;font-size:11px" onclick="reopenPhoto()">🖼️ 換圖</button>
+        </div>
+        <div id="crop-container" class="crop-container">
+          <img id="crop-img" class="crop-img" draggable="false" src="" alt="">
+          <div class="crop-guide"></div>
+        </div>
+        <div class="crop-hint">拖移調整 · 九宮格輔助線 · 確定後繼續辨識</div>
+      </div>
+
       <div class="btn-row" style="margin-bottom:.75rem">
         <button class="btn" onclick="triggerPhotoCamera()">📷 拍照</button>
         <button class="btn" onclick="triggerPhotoGallery()">🖼️ 相簿</button>
@@ -513,11 +860,30 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
     <div id="step2-panel" class="hidden">
       <div class="ai-result-banner" id="ai-banner">
         <div class="ai-result-emoji" id="ai-emoji">🌿</div>
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="ai-result-name" id="ai-name-display">—</div>
           <div class="ai-result-latin" id="ai-latin-display">—</div>
         </div>
-        <div class="ai-conf-badge" id="ai-conf">高</div>
+      </div>
+
+      <!-- 信心度進度條 -->
+      <div id="ai-conf-section">
+        <div class="conf-label">🎯 AI 辨識信心度</div>
+        <div class="conf-bar-wrap">
+          <div class="conf-bar-track"><div class="conf-bar-fill" id="ai-conf-bar" style="width:0%"></div></div>
+          <div class="conf-bar-pct" id="ai-conf-pct">—</div>
+        </div>
+      </div>
+
+      <!-- AI 觀察到的特徵 -->
+      <div id="ai-features-box" class="ai-features-box hidden">
+        <b>🔍 AI 觀察到：</b> <span id="ai-features-text"></span>
+      </div>
+
+      <!-- 備選物種 -->
+      <div id="ai-alt-wrap" class="ai-alt-wrap hidden">
+        <div class="ai-alt-title">⚠️ 也可能是（點擊可切換）：</div>
+        <div class="ai-alt-list" id="ai-alt-list"></div>
       </div>
 
       <div style="font-size:11px;color:var(--g600);margin-bottom:.85rem;display:flex;align-items:center;gap:4px">
@@ -574,17 +940,16 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
 
       <div class="form-row">
         <label class="form-label">校園位置 / 區域</label>
-        <input class="form-input" id="f-zone" placeholder="例：操場旁、圖書館門口、B棟走廊...">
-      </div>
-
-      <div class="form-row">
-        <label class="form-label">GPS 座標（選填）</label>
-        <div class="gps-row">
-          <input class="form-input" id="f-lat" placeholder="緯度">
-          <input class="form-input" id="f-lng" placeholder="經度">
-          <button class="btn primary" onclick="getGPS()" style="flex-shrink:0">📍 定位</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select class="form-input" id="f-zone-select" onchange="onZoneSelectChange()"
+            style="flex:0 0 auto;width:140px;cursor:pointer"></select>
+          <input class="form-input" id="f-zone" placeholder="或自行輸入區域..." style="flex:1">
         </div>
       </div>
+
+      <!-- GPS 隱藏欄位（保留資料相容性，不顯示） -->
+      <input type="hidden" id="f-lat">
+      <input type="hidden" id="f-lng">
 
       <div class="form-row">
         <label class="form-label">尋寶提示（給學生的線索）</label>
@@ -629,6 +994,7 @@ body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh
       <!-- Basic Info -->
       <div id="mpane-basic">
         <div id="m-basic-grid" class="basic-grid"></div>
+        <div id="m-morph"></div>
         <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem" id="m-loc-label">位置資訊</div>
         <div id="m-loc-info"></div>
         <div id="m-desc" class="plant-intro"></div>
@@ -791,10 +1157,122 @@ function applyI18n(){
 
 // ===== DATA =====
 let plants = JSON.parse(localStorage.getItem('campus-plants') || '[]');
+let isReadOnlyMode = false;   // true = 從 campus-plant-data.json 載入，唯讀展示模式
 let huntFound = JSON.parse(localStorage.getItem('campus-hunt') || '{}');
 
-function savePlants(){ localStorage.setItem('campus-plants', JSON.stringify(plants)); }
+function savePlants(){
+  if(isReadOnlyMode) return; // 展示模式不寫入 localStorage
+  localStorage.setItem('campus-plants', JSON.stringify(plants));
+}
+
+function applyReadOnlyMode(){
+  // 隱藏所有新增 / 編輯入口
+  const hideIds = ['add-mode-btn','add-plant-fab'];
+  hideIds.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  // 隱藏設定頁面的管理按鈕
+  document.querySelectorAll('.btn.danger').forEach(el=>el.style.display='none');
+  // 顯示唯讀橫幅
+  const banner = document.getElementById('readonly-banner');
+  if(banner) banner.classList.remove('hidden');
+}
 function saveHunt(){ localStorage.setItem('campus-hunt', JSON.stringify(huntFound)); }
+
+// ===== ZONES =====
+const DEFAULT_ZONES = ['小學部','中學部','幼兒園','大操場','圖書館','行政大樓','校門口','宿舍'];
+let campusZones = [];
+function loadZones(){
+  const saved = localStorage.getItem('campus-zones');
+  campusZones = saved ? JSON.parse(saved) : [...DEFAULT_ZONES];
+  updateZoneSelect();
+}
+function updateZoneSelect(){
+  const sel = document.getElementById('f-zone-select');
+  if(!sel) return;
+  const cur = document.getElementById('f-zone')?.value || '';
+  sel.innerHTML = '<option value="">📍 選擇區域</option>'
+    + campusZones.map(z=>`<option value="${z}">${z}</option>`).join('');
+  if(cur && campusZones.includes(cur)) sel.value = cur;
+}
+function onZoneSelectChange(){
+  const sel = document.getElementById('f-zone-select');
+  const inp = document.getElementById('f-zone');
+  if(sel && inp && sel.value) inp.value = sel.value;
+}
+function saveZonesSettings(){
+  const txt = document.getElementById('zones-textarea')?.value || '';
+  campusZones = txt.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!campusZones.length) campusZones = [...DEFAULT_ZONES];
+  localStorage.setItem('campus-zones', JSON.stringify(campusZones));
+  updateZoneSelect();
+  showToast('✅ 區域設定已儲存！');
+}
+
+// ===== MAP IMAGE =====
+function loadMapImage(){
+  const data = localStorage.getItem('campus-map-img');
+  if(!data){ mapImg = null; return; }
+  mapImg = new Image();
+  mapImg.onload = ()=>{
+    if(canvas) renderMap();
+    // 若目前在護照頁，重繪以更新縮圖
+    if(currentTab === 'passport') renderPassports();
+  };
+  mapImg.src = data;
+}
+function uploadMapImage(){
+  const file = document.getElementById('map-img-file')?.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      // Scale down to max 1800px wide to keep localStorage under limit
+      const MAX = 1800;
+      let sw = img.width, sh = img.height;
+      if(sw > MAX){ sh = Math.round(sh * MAX/sw); sw = MAX; }
+      const tmp = document.createElement('canvas');
+      tmp.width = sw; tmp.height = sh;
+      tmp.getContext('2d').drawImage(img, 0, 0, sw, sh);
+      // Adjust canvas aspect to match image
+      const data = tmp.toDataURL('image/jpeg', 0.82);
+      try {
+        localStorage.setItem('campus-map-img', data);
+      } catch(err){
+        alert('圖片檔案太大，請換一張較小的圖（建議 2MB 以下）。');
+        return;
+      }
+      mapImg = new Image();
+      mapImg.onload = ()=>{
+        // Resize canvas to match image ratio (capped at 0.7 height ratio)
+        if(canvas){
+          const ratio = Math.min(mapImg.height/mapImg.width, 0.7);
+          canvas.height = Math.round(canvas.width * ratio);
+          renderMap();
+        }
+      };
+      mapImg.src = data;
+      updateMapImagePreview(data);
+      showToast('✅ 校園地圖已上傳！');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearMapImage(){
+  localStorage.removeItem('campus-map-img');
+  mapImg = null;
+  const prev = document.getElementById('map-img-preview');
+  if(prev){ prev.style.display='none'; prev.src=''; }
+  if(canvas){ canvas.height = Math.round(canvas.width * 0.6); renderMap(); }
+  showToast('地圖圖片已清除');
+}
+function updateMapImagePreview(data){
+  const prev = document.getElementById('map-img-preview');
+  if(!prev) return;
+  const src = data || localStorage.getItem('campus-map-img');
+  if(src){ prev.src=src; prev.style.display='block'; }
+  else { prev.style.display='none'; prev.src=''; }
+}
 
 const CAT_COLORS = {
   '喬木':'#1D9E75','Tree':'#1D9E75','Cây Gỗ':'#1D9E75',
@@ -812,7 +1290,12 @@ function catColor(cat){
 let currentTab = 'map';
 function showTab(tab){
   currentTab = tab;
-  ['map','list','passport','hunt','settings'].forEach(id=>{
+  // 切換 Tab 時關閉所有 overlay（modal / form）
+  document.getElementById('modal-overlay')?.classList.add('hidden');
+  document.getElementById('form-overlay')?.classList.add('hidden');
+  // 若離開地圖頁，取消放置模式
+  if(tab !== 'map'){ hidePlacePanel(); hideBanner(); }
+  ['map','list','passport','diagnose','hunt','settings'].forEach(id=>{
     document.getElementById('pane-'+id).classList.toggle('hidden', id!==tab);
     document.getElementById('tab-'+id).classList.toggle('active', id===tab);
   });
@@ -826,63 +1309,505 @@ function showTab(tab){
 // ===== MAP =====
 let canvas, ctx;
 let mapImg = null;
-let addMode = false;
+let addMode = false;   // false | 'new' | 'place' | 'extra'
+let placeTargetId = null;
+let pendingExtraZone = ''; // 記住使用者輸入的 extra 位置區域
 let pendingMapX = null, pendingMapY = null;
+
+// 拖移狀態
+let dragPlant = null;
+let dragMoved = false;
+
+// 縮放 & 平移狀態
+let mapZoom = 1;
+let mapPanX = 0, mapPanY = 0;
+let isPanning = false;
+let panStartRawX = 0, panStartRawY = 0;
+let panStartPanX = 0, panStartPanY = 0;
+let lastTapTime = 0; // 觸控雙擊偵測
+
+// 分區 / 聚合狀態
+let activeZone = null;      // 目前聚焦的分區名稱（null = 全校總覽）
+let zoneBadgeHits = [];     // [{name, cx, cy, hw, hh}] canvas 像素座標
+let clusterHits = [];       // [{cx, cy, r, pins}] canvas 像素座標
+
+// 限制平移範圍，不超出地圖邊界
+function clampPan(px, py){
+  const w = canvas.width, h = canvas.height;
+  if(mapZoom <= 1) return {x:0, y:0};
+  return {
+    x: Math.min(0, Math.max(w*(1-mapZoom), px)),
+    y: Math.min(0, Math.max(h*(1-mapZoom), py))
+  };
+}
+
+// 取得 canvas 原始像素座標（未套用 zoom/pan）
+function getRawPos(e, touch){
+  const r = canvas.getBoundingClientRect();
+  const src = touch || e;
+  return {
+    rx: (src.clientX - r.left) / r.width * canvas.width,
+    ry: (src.clientY - r.top)  / r.height * canvas.height
+  };
+}
+
+// 取得世界百分比座標（已套用 zoom/pan 反轉換）
+function getCanvasPos(e, touch){
+  const {rx, ry} = getRawPos(e, touch);
+  return {
+    x: ((rx - mapPanX) / mapZoom) / canvas.width  * 100,
+    y: ((ry - mapPanY) / mapZoom) / canvas.height * 100
+  };
+}
+
+// 在指定螢幕位置縮放
+function zoomAt(rx, ry, newZoom){
+  const worldX = (rx - mapPanX) / mapZoom;
+  const worldY = (ry - mapPanY) / mapZoom;
+  mapZoom = newZoom;
+  const pan = clampPan(rx - worldX * mapZoom, ry - worldY * mapZoom);
+  mapPanX = pan.x; mapPanY = pan.y;
+  renderMap();
+}
+
+// 指定 zoom 時的 clamp（不依賴目前 mapZoom）
+function clampPanAt(px, py, zoom){
+  const w = canvas.width, h = canvas.height;
+  if(zoom <= 1) return {x:0, y:0};
+  return {
+    x: Math.min(0, Math.max(w*(1-zoom), px)),
+    y: Math.min(0, Math.max(h*(1-zoom), py))
+  };
+}
+
+// 動畫縮放到世界座標中心點（cx/cy 為 canvas 像素，非百分比）
+function animateZoomTo(targetZoom, cx, cy){
+  const w = canvas.width, h = canvas.height;
+  const tp = clampPanAt(w/2 - cx*targetZoom, h/2 - cy*targetZoom, targetZoom);
+  const sz = mapZoom, spx = mapPanX, spy = mapPanY;
+  const dur = 380, t0 = performance.now();
+  function step(now){
+    const t = Math.min(1, (now-t0)/dur);
+    const e = t<0.5 ? 2*t*t : -1+(4-2*t)*t; // ease-in-out
+    mapZoom = sz + (targetZoom-sz)*e;
+    mapPanX = spx + (tp.x-spx)*e;
+    mapPanY = spy + (tp.y-spy)*e;
+    renderMap();
+    if(t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+// 縮放並平移到某分區的邊界框
+function zoomToZone(zoneName){
+  if(!canvas) return;
+  const w = canvas.width, h = canvas.height;
+  const xs=[], ys=[];
+  plants.forEach(p=>{
+    if(p.mapX != null && (p.zone||'未分區')===zoneName){
+      xs.push(p.mapX/100*w); ys.push(p.mapY/100*h);
+    }
+    (p.extraLocations||[]).forEach(loc=>{
+      if((loc.zone||p.zone||'未分區')===zoneName){
+        xs.push(loc.mapX/100*w); ys.push(loc.mapY/100*h);
+      }
+    });
+  });
+  if(!xs.length) return;
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const rangeX = Math.max(w*0.25, (maxX-minX)*1.5);
+  const rangeY = Math.max(h*0.25, (maxY-minY)*1.5);
+  const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
+  const newZoom = Math.min(4, Math.max(1.8, Math.min(w/rangeX, h/rangeY)));
+  activeZone = zoneName;
+  animateZoomTo(newZoom, cx, cy);
+}
+
+// 將所有 pins 依螢幕距離聚合（回傳 clusters 陣列）
+function clusterPins(allPins){
+  const THRESH = 40; // 螢幕像素
+  const used = new Set();
+  const clusters = [];
+  for(let i=0; i<allPins.length; i++){
+    if(used.has(i)) continue;
+    const grp = [allPins[i]]; used.add(i);
+    for(let j=i+1; j<allPins.length; j++){
+      if(used.has(j)) continue;
+      const dx = allPins[i].wx - allPins[j].wx;
+      const dy = allPins[i].wy - allPins[j].wy;
+      if(Math.sqrt(dx*dx+dy*dy)*mapZoom < THRESH){ grp.push(allPins[j]); used.add(j); }
+    }
+    clusters.push(grp);
+  }
+  return clusters;
+}
+
+// 偵測 overlay UI 的點擊（breadcrumb）
+// rx/ry 為 canvas 原始像素（未套用 zoom/pan）
+function handleOverlayClick(rx, ry){
+  // Breadcrumb「← 全校」按鈕
+  if(activeZone && mapZoom >= 1.5){
+    const bw = (window._breadcrumbW||200) + 8;
+    if(rx >= 8 && rx <= 8+bw && ry >= 8 && ry <= 38){
+      activeZone = null;
+      mapZoom = 1; mapPanX = 0; mapPanY = 0;
+      renderMap(); return true;
+    }
+  }
+  return false;
+}
+
+function findMarkerAt(x, y){
+  const mw = canvas.width, mh = canvas.height;
+  const hitR = 36 / mapZoom;
+  for(const p of plants){
+    // 主要位置
+    if(p.mapX != null){
+      const px = p.mapX/100*mw, py = p.mapY/100*mh;
+      const dx = (x/100*mw)-px, dy = (y/100*mh)-py;
+      if(Math.sqrt(dx*dx+dy*dy) < hitR) return p;
+    }
+    // 額外位置
+    for(const loc of (p.extraLocations||[])){
+      const px = loc.mapX/100*mw, py = loc.mapY/100*mh;
+      const dx = (x/100*mw)-px, dy = (y/100*mh)-py;
+      if(Math.sqrt(dx*dx+dy*dy) < hitR) return p;
+    }
+  }
+  return null;
+}
+
+// 只偵測主要位置（供拖移用）
+function findPrimaryMarkerAt(x, y){
+  const mw = canvas.width, mh = canvas.height;
+  const hitR = 36 / mapZoom;
+  for(const p of plants){
+    if(p.mapX == null) continue;
+    const px = p.mapX/100*mw, py = p.mapY/100*mh;
+    const dx = (x/100*mw)-px, dy = (y/100*mh)-py;
+    if(Math.sqrt(dx*dx+dy*dy) < hitR) return p;
+  }
+  return null;
+}
 
 function initCanvas(){
   canvas = document.getElementById('map-canvas');
   ctx = canvas.getContext('2d');
-  // Responsive width
   const w = canvas.parentElement.offsetWidth;
   canvas.width = w;
-  canvas.height = Math.round(w * 0.6);
+  const savedImg = localStorage.getItem('campus-map-img');
+  if(savedImg){
+    const tmpImg = new Image();
+    tmpImg.onload = ()=>{
+      const ratio = Math.min(tmpImg.height/tmpImg.width, 0.7);
+      canvas.height = Math.round(w * ratio);
+      loadMapImage();
+    };
+    tmpImg.src = savedImg;
+  } else {
+    canvas.height = Math.round(w * 0.6);
+  }
 
-  canvas.addEventListener('click', onMapClick);
-  canvas.addEventListener('touchend', e=>{
+  // ── 雙擊放大 / 縮小 ──
+  canvas.addEventListener('dblclick', e=>{
     e.preventDefault();
-    const r = canvas.getBoundingClientRect();
-    const t = e.changedTouches[0];
-    const x = (t.clientX - r.left) / r.width * 100;
-    const y = (t.clientY - r.top) / r.height * 100;
-    handleMapClick(x, y);
+    const {rx, ry} = getRawPos(e);
+    const newZoom = mapZoom < 2 ? 2 : mapZoom < 4 ? 4 : 1;
+    if(newZoom === 1){ mapZoom=1; mapPanX=0; mapPanY=0; activeZone=null; renderMap(); }
+    else { zoomAt(rx, ry, newZoom); }
+  });
+
+  // ── 滑鼠事件 ──
+  canvas.addEventListener('mousedown', e=>{
+    if(e.detail >= 2) return; // 忽略雙擊的 mousedown
+    if(addMode) return;
+    const {rx, ry} = getRawPos(e);
+    const {x, y} = getCanvasPos(e);
+    const p = findPrimaryMarkerAt(x, y); // 只拖移主要標記
+    if(p){
+      dragPlant = p; dragMoved = false; e.preventDefault();
+    } else if(mapZoom > 1){
+      isPanning = true;
+      panStartRawX = rx; panStartRawY = ry;
+      panStartPanX = mapPanX; panStartPanY = mapPanY;
+      canvas.style.setProperty('cursor','move','important');
+      e.preventDefault();
+    }
+  });
+
+  canvas.addEventListener('mousemove', e=>{
+    const {rx, ry} = getRawPos(e);
+    const {x, y} = getCanvasPos(e);
+    if(dragPlant){
+      dragMoved = true;
+      dragPlant.mapX = Math.min(99, Math.max(1, Math.round(x)));
+      dragPlant.mapY = Math.min(99, Math.max(1, Math.round(y)));
+      canvas.style.setProperty('cursor','grabbing','important');
+      renderMap();
+    } else if(isPanning){
+      const pan = clampPan(panStartPanX + (rx - panStartRawX), panStartPanY + (ry - panStartRawY));
+      mapPanX = pan.x; mapPanY = pan.y;
+      renderMap();
+    } else {
+      const hit = findMarkerAt(x, y);
+      canvas.style.setProperty('cursor',
+        hit ? 'grab' : (mapZoom > 1 ? 'move' : (addMode ? 'crosshair' : 'default')),
+        'important');
+    }
+  });
+
+  canvas.addEventListener('mouseup', e=>{
+    const {rx,ry} = getRawPos(e);
+    if(dragPlant){
+      if(dragMoved){ savePlants(); }
+      else {
+        if(!handleOverlayClick(rx,ry)){
+          const {x,y}=getCanvasPos(e); handleMapClick(x,y);
+        }
+      }
+      dragPlant = null; dragMoved = false;
+      const {x,y}=getCanvasPos(e);
+      canvas.style.setProperty('cursor', findMarkerAt(x,y)?'grab':(mapZoom>1?'move':'default'), 'important');
+    } else if(isPanning){
+      isPanning = false;
+      canvas.style.setProperty('cursor','move','important');
+    } else {
+      if(!handleOverlayClick(rx,ry)){
+        const {x,y} = getCanvasPos(e);
+        handleMapClick(x, y);
+      }
+    }
+  });
+
+  canvas.addEventListener('mouseleave', ()=>{
+    if(dragPlant && dragMoved) savePlants();
+    dragPlant = null; dragMoved = false; isPanning = false;
+    canvas.style.setProperty('cursor','crosshair','important');
+  });
+
+  // ── 觸控事件 ──
+  canvas.addEventListener('touchstart', e=>{
+    // 雙擊放大偵測
+    const now = Date.now();
+    if(now - lastTapTime < 300 && e.touches.length === 1){
+      e.preventDefault();
+      const {rx, ry} = getRawPos(null, e.touches[0]);
+      const newZoom = mapZoom < 2 ? 2 : mapZoom < 4 ? 4 : 1;
+      if(newZoom === 1){ mapZoom=1; mapPanX=0; mapPanY=0; activeZone=null; renderMap(); }
+      else { zoomAt(rx, ry, newZoom); }
+      lastTapTime = 0; return;
+    }
+    lastTapTime = now;
+
+    if(addMode) return;
+    const {x, y} = getCanvasPos(null, e.touches[0]);
+    const p = findPrimaryMarkerAt(x, y); // 只拖移主要標記
+    if(p){ dragPlant = p; dragMoved = false; e.preventDefault(); }
+    else if(mapZoom > 1 && e.touches.length === 1){
+      const {rx, ry} = getRawPos(null, e.touches[0]);
+      isPanning = true;
+      panStartRawX = rx; panStartRawY = ry;
+      panStartPanX = mapPanX; panStartPanY = mapPanY;
+      e.preventDefault();
+    }
+  }, {passive:false});
+
+  canvas.addEventListener('touchmove', e=>{
+    e.preventDefault();
+    if(dragPlant){
+      dragMoved = true;
+      const {x,y} = getCanvasPos(null, e.touches[0]);
+      dragPlant.mapX = Math.min(99, Math.max(1, Math.round(x)));
+      dragPlant.mapY = Math.min(99, Math.max(1, Math.round(y)));
+      renderMap();
+    } else if(isPanning && e.touches.length === 1){
+      const {rx, ry} = getRawPos(null, e.touches[0]);
+      const pan = clampPan(panStartPanX + (rx - panStartRawX), panStartPanY + (ry - panStartRawY));
+      mapPanX = pan.x; mapPanY = pan.y;
+      renderMap();
+    }
+  }, {passive:false});
+
+  canvas.addEventListener('touchend', e=>{
+    if(dragPlant){
+      if(dragMoved){ savePlants(); }
+      else {
+        const t0 = e.changedTouches[0];
+        const {rx,ry} = getRawPos(null,t0);
+        if(!handleOverlayClick(rx,ry)){
+          const {x,y}=getCanvasPos(null,t0); handleMapClick(x,y);
+        }
+      }
+      dragPlant = null; dragMoved = false;
+    } else if(!dragMoved){
+      // 非拖移的 touchend（panning 結束或單純點擊）
+      if(!isPanning){
+        const t0 = e.changedTouches[0];
+        const {rx,ry} = getRawPos(null,t0);
+        if(handleOverlayClick(rx,ry)){ isPanning=false; return; }
+      }
+    }
+    isPanning = false;
   });
 }
 
-function onMapClick(e){
-  const r = canvas.getBoundingClientRect();
-  const x = (e.clientX - r.left) / r.width * 100;
-  const y = (e.clientY - r.top) / r.height * 100;
-  handleMapClick(x, y);
-}
-
 function handleMapClick(x, y){
-  if(addMode){
-    pendingMapX = Math.round(x);
-    pendingMapY = Math.round(y);
-    document.getElementById('f-mx').value = pendingMapX;
-    document.getElementById('f-my').value = pendingMapY;
-    addMode = false;
-    document.getElementById('add-mode-btn').textContent = t('addModeOff');
+  const rx = Math.round(x), ry = Math.round(y);
+  if(addMode === 'new' || addMode === true){
+    pendingMapX = rx; pendingMapY = ry;
+    document.getElementById('f-mx').value = rx;
+    document.getElementById('f-my').value = ry;
+    cancelAddMode();
     openAddForm();
     return;
   }
-  // Check if clicked on a plant marker
-  const mw = canvas.width, mh = canvas.height;
-  for(const p of plants){
-    if(p.mapX == null) continue;
-    const px = p.mapX / 100 * mw;
-    const py = p.mapY / 100 * mh;
-    const dx = (x/100*mw) - px, dy = (y/100*mh) - py;
-    if(Math.sqrt(dx*dx+dy*dy) < 18){
-      showPlantDetail(p.id);
-      return;
+  if(addMode === 'place'){
+    const p = plants.find(pl=>pl.id===placeTargetId);
+    if(p){
+      p.mapX = rx; p.mapY = ry;
+      // 若選了區域，更新
+      const zSel = document.getElementById('place-zone-select');
+      if(zSel && zSel.value) p.zone = zSel.value;
+      savePlants(); renderAll();
+      showToast(`✅ 已將「${p.name}」放到地圖！`);
     }
+    cancelAddMode();
+    return;
+  }
+  if(addMode === 'extra'){
+    const p = plants.find(pl=>pl.id===placeTargetId);
+    if(p){
+      if(!p.extraLocations) p.extraLocations = [];
+      const zone = pendingExtraZone || p.zone || '';
+      p.extraLocations.push({ id: Date.now().toString(), mapX: rx, mapY: ry, zone });
+      savePlants(); renderAll();
+      showToast(`✅ 已為「${p.name}」新增位置：${zone||'（未命名）'}`);
+    }
+    cancelAddMode();
+    return;
+  }
+  // 一般模式
+  const clickX = x/100*canvas.width, clickY = y/100*canvas.height;
+
+  if(mapZoom < 1.5){
+    // 分區徽章模式：點擊徽章縮放進入該區
+    for(const badge of zoneBadgeHits){
+      if(Math.abs(clickX-badge.cx) <= badge.hw && Math.abs(clickY-badge.cy) <= badge.hh){
+        zoomToZone(badge.name); return;
+      }
+    }
+  } else {
+    // Pin / Cluster 模式
+    // 1. 先檢查 cluster
+    for(const cl of clusterHits){
+      const dx=clickX-cl.cx, dy=clickY-cl.cy;
+      if(Math.sqrt(dx*dx+dy*dy) <= cl.r){
+        // 放大到 cluster 中心
+        const newZoom = Math.min(4, mapZoom*2);
+        animateZoomTo(newZoom, cl.cx, cl.cy); return;
+      }
+    }
+    // 2. 再檢查個別 pin
+    const p = findMarkerAt(x, y);
+    if(p){ showPlantDetail(p.id); return; }
   }
 }
 
 function toggleAddMode(){
-  addMode = !addMode;
-  document.getElementById('add-mode-btn').textContent = addMode ? t('addModeOn') : t('addModeOff');
+  if(addMode){ cancelAddMode(); return; }
+  showPlacePanel();
+}
+
+function showPlacePanel(){
+  // 填充「放置已有植物」下拉：只顯示尚未有主要位置的植物
+  const unplaced = plants.filter(p=>p.mapX==null);
+  const sel = document.getElementById('place-plant-select');
+  if(sel){
+    sel.innerHTML = '<option value="">── 選擇植物 ──</option>'
+      + unplaced.map(p=>`<option value="${p.id}">${p.emoji||'🌿'} ${p.name}</option>`).join('');
+  }
+  // 區域下拉
+  const zsel = document.getElementById('place-zone-select');
+  if(zsel){
+    zsel.innerHTML = '<option value="">📍 區域（可選）</option>'
+      + campusZones.map(z=>`<option value="${z}">${z}</option>`).join('');
+  }
+  // 更新提示
+  const hint = document.getElementById('place-panel-hint');
+  if(hint){
+    hint.textContent = unplaced.length
+      ? `清單中有 ${unplaced.length} 株植物尚未放到地圖上。選擇後點擊地圖即可放置。`
+      : '所有植物都已在地圖上了！可使用「新增全新植物」或到植物詳情中新增額外位置。';
+  }
+  document.getElementById('place-panel').classList.remove('hidden');
+  document.getElementById('add-mode-btn').style.background = 'var(--g50)';
+}
+
+function hidePlacePanel(){
+  document.getElementById('place-panel').classList.add('hidden');
+  document.getElementById('add-mode-btn').style.background = '';
+}
+
+function startNewPlantMode(){
+  hidePlacePanel();
+  addMode = 'new';
+  document.getElementById('add-mode-btn').textContent = t('addModeOn');
+  showBanner('📍 點擊地圖放置位置，再填寫植物資料');
+}
+
+function confirmPlaceFromList(){
+  const plantId = document.getElementById('place-plant-select')?.value;
+  if(!plantId){ alert('請先選擇一株植物'); return; }
+  const p = plants.find(pl=>pl.id===plantId);
+  if(!p) return;
+  hidePlacePanel();
+  addMode = 'place';
+  placeTargetId = plantId;
+  showBanner(`📍 點擊地圖，為「${p.name}」設定位置`);
+}
+
+function startExtraLocMode(plantId){
+  // 先讀取區域選擇的值（modal 關掉後就拿不到了）
+  const zInput = document.getElementById('extra-zone-input');
+  pendingExtraZone = zInput ? zInput.value : '';
+  // 關閉 modal，切換到地圖 tab
+  closeModal();
+  if(currentTab !== 'map') showTab('map');
+  addMode = 'extra';
+  placeTargetId = plantId;
+  const p = plants.find(pl=>pl.id===plantId);
+  showBanner(`📍 點擊地圖，為「${p?.name||'植物'}」新增一個位置`);
+}
+
+function cancelAddMode(){
+  addMode = false;
+  placeTargetId = null;
+  pendingExtraZone = '';
+  pendingMapX = pendingMapY = null;
+  document.getElementById('add-mode-btn').textContent = t('addModeOff');
+  document.getElementById('add-mode-btn').style.background = '';
+  hidePlacePanel();
+  hideBanner();
+}
+
+function showBanner(msg){
+  const b = document.getElementById('place-mode-banner');
+  if(!b) return;
+  document.getElementById('place-mode-banner-text').textContent = msg;
+  b.classList.remove('hidden');
+}
+function hideBanner(){
+  document.getElementById('place-mode-banner')?.classList.add('hidden');
+}
+
+function removeExtraLocation(plantId, locId){
+  const p = plants.find(pl=>pl.id===plantId);
+  if(!p || !p.extraLocations) return;
+  p.extraLocations = p.extraLocations.filter(l=>l.id!==locId);
+  savePlants();
+  renderMap();
+  showPlantDetail(plantId); // 重整 modal
 }
 
 function renderMap(){
@@ -890,72 +1815,354 @@ function renderMap(){
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0,0,w,h);
 
-  // Background grid
-  ctx.fillStyle = '#F0F7F4';
-  ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle = 'rgba(29,158,117,0.1)';
-  ctx.lineWidth = 1;
-  for(let x=0;x<w;x+=w/10){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke(); }
-  for(let y=0;y<h;y+=h/8){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke(); }
+  // 套用縮放 / 平移
+  ctx.setTransform(mapZoom, 0, 0, mapZoom, mapPanX, mapPanY);
 
-  // Decorative zones
-  const zones = [
-    {x:.05,y:.05,w:.9,h:.9,label:'校園範圍',color:'rgba(29,158,117,0.05)',stroke:'rgba(29,158,117,0.2)'},
-  ];
-  zones.forEach(z=>{
-    ctx.fillStyle = z.color;
-    ctx.strokeStyle = z.stroke;
+  if(mapImg && mapImg.complete && mapImg.naturalWidth > 0){
+    // ── 真實地圖背景 ──
+    ctx.drawImage(mapImg, 0, 0, w, h);
+    // 半透明暗罩，讓標記更清晰
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(0,0,w,h);
+  } else {
+    // ── 預設格線背景 ──
+    ctx.fillStyle = '#F0F7F4';
+    ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle = 'rgba(29,158,117,0.1)';
+    ctx.lineWidth = 1;
+    for(let gx=0;gx<w;gx+=w/10){ ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,h);ctx.stroke(); }
+    for(let gy=0;gy<h;gy+=h/8){ ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(w,gy);ctx.stroke(); }
+    // 校園框線
+    ctx.fillStyle = 'rgba(29,158,117,0.05)';
+    ctx.strokeStyle = 'rgba(29,158,117,0.2)';
     ctx.lineWidth = 1.5;
-    roundRect(ctx, z.x*w, z.y*h, z.w*w, z.h*h, 12);
-    ctx.fill();ctx.stroke();
+    roundRect(ctx, w*.05, h*.05, w*.9, h*.9, 12);
+    ctx.fill(); ctx.stroke();
     ctx.fillStyle = 'rgba(29,158,117,0.35)';
     ctx.font = `bold ${Math.max(10,w*0.015)}px sans-serif`;
-    ctx.fillText(z.label, z.x*w+8, z.y*h+16);
-  });
+    ctx.fillText('校園範圍', w*.05+8, h*.05+16);
+  }
 
   // Filter
   const filterCat = document.getElementById('filter-category')?.value || '';
 
   // Plant markers
   const visPlants = filterCat ? plants.filter(p=>p.category===filterCat) : plants;
-  visPlants.forEach(p=>{
-    if(p.mapX == null) return;
-    const px = p.mapX/100*w, py = p.mapY/100*h;
-    const color = catColor(p.category);
-    // Shadow
-    ctx.shadowColor = 'rgba(0,0,0,0.15)';
-    ctx.shadowBlur = 6;
-    // Marker pin
+  const useRealMap = (mapImg && mapImg.complete && mapImg.naturalWidth > 0);
+
+  // 重置 hit areas（每次 render 重新計算）
+  zoneBadgeHits = []; clusterHits = [];
+
+  // ─── 繪製單一 Pin ───
+  function drawPin(px, py, color, emoji, label, isExtra){
+    const pinR = isExtra ? (useRealMap ? 11 : 10) : (useRealMap ? 15 : 13);
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = useRealMap ? 8 : 5;
+    ctx.shadowOffsetY = useRealMap ? 2 : 0;
+    // Pin circle
     ctx.beginPath();
-    ctx.arc(px, py-4, 13, 0, Math.PI*2);
-    ctx.fillStyle = color;
+    ctx.arc(px, py-pinR/2, pinR, 0, Math.PI*2);
+    ctx.fillStyle = isExtra ? '#fff' : color;
     ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = isExtra ? color : '#fff';
+    ctx.lineWidth = isExtra ? (useRealMap ? 2.5 : 2) : (useRealMap ? 2.5 : 2);
     ctx.stroke();
-    ctx.shadowBlur = 0;
-    // Emoji / number
-    ctx.font = `${Math.max(12,w*0.02)}px sans-serif`;
+    // Pin tail
+    ctx.beginPath();
+    ctx.moveTo(px-4, py+pinR/2);
+    ctx.lineTo(px+4, py+pinR/2);
+    ctx.lineTo(px, py+pinR/2+7);
+    ctx.closePath();
+    ctx.fillStyle = isExtra ? '#fff' : color;
+    ctx.fill();
+    ctx.strokeStyle = isExtra ? color : '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+    ctx.shadowColor = 'transparent';
+    // Emoji
+    ctx.font = `${isExtra ? Math.max(9,w*0.016) : Math.max(12,w*0.022)}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(p.emoji||'🌿', px, py-4);
-    // Name label
-    ctx.fillStyle = '#333';
-    ctx.font = `bold ${Math.max(9,w*0.013)}px sans-serif`;
-    ctx.fillText(p.name, px, py+12);
-  });
+    ctx.fillStyle = isExtra ? color : '#fff';
+    if(isExtra){ ctx.fillStyle = color; } // extra: colored emoji on white bg
+    ctx.fillText(emoji||'🌿', px, py - pinR/2);
+    // Label pill (only for primary)
+    if(!isExtra && label){
+      const fs = Math.max(9, w*0.013);
+      ctx.font = `bold ${fs}px sans-serif`;
+      const tw = ctx.measureText(label).width;
+      const padX = 6, padY = 3;
+      const pillW = tw + padX*2, pillH = fs + padY*2;
+      const lx = px - pillW/2;
+      const ly = py + pinR/2 + 10;
+      // Pill background
+      ctx.fillStyle = useRealMap ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.85)';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, lx, ly, pillW, pillH, 4);
+      ctx.fill(); ctx.stroke();
+      // Label text
+      ctx.fillStyle = '#1a1a18';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, px, ly + pillH/2);
+    }
+  }
+
+  // ─── 繪製分區徽章 ───
+  function drawZoneBadge(cx, cy, name, count, color){
+    const fs = Math.max(12, w*0.018);
+    const countStr = `${count} 種`;
+    ctx.font = `bold ${fs}px sans-serif`;
+    const nw = ctx.measureText(name).width;
+    ctx.font = `${Math.max(10,w*0.014)}px sans-serif`;
+    const cw = ctx.measureText(countStr).width;
+    const bw = Math.max(nw, cw) + 28, bh = fs*2 + 18;
+    const bx = cx - bw/2, by = cy - bh/2;
+    // 陰影
+    ctx.shadowColor = 'rgba(0,0,0,0.28)'; ctx.shadowBlur = 14; ctx.shadowOffsetY = 4;
+    // 背景圓角矩形
+    ctx.fillStyle = color;
+    roundRect(ctx, bx, by, bw, bh, 12); ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; ctx.shadowColor = 'transparent';
+    // 高光層
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    roundRect(ctx, bx+2, by+2, bw-4, bh/2, 10); ctx.fill();
+    // 名稱
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${fs}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(name, cx, cy - fs*0.45);
+    // 數量
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.font = `${Math.max(10,w*0.014)}px sans-serif`;
+    ctx.fillText(countStr, cx, cy + fs*0.65);
+    // 儲存 hit area
+    zoneBadgeHits.push({name, cx, cy, hw: bw/2+4, hh: bh/2+4});
+  }
+
+  // ─── 繪製聚合泡泡 ───
+  function drawCluster(cx, cy, count, colors){
+    const r = Math.max(18, w*0.024);
+    const uniq = [...new Set(colors)].slice(0,4);
+    // 多色扇形外環
+    if(uniq.length > 1){
+      const slice = (Math.PI*2)/uniq.length;
+      uniq.forEach((c,i)=>{
+        ctx.beginPath(); ctx.moveTo(cx,cy);
+        ctx.arc(cx,cy,r+3,i*slice-Math.PI/2,(i+1)*slice-Math.PI/2);
+        ctx.closePath(); ctx.fillStyle=c; ctx.fill();
+      });
+    }
+    // 主圓
+    ctx.shadowColor='rgba(0,0,0,0.32)'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.fillStyle = uniq[0]||'#1D9E75'; ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2.5; ctx.stroke();
+    ctx.shadowBlur=0; ctx.shadowColor='transparent';
+    // 數字
+    ctx.fillStyle='#fff';
+    ctx.font=`bold ${Math.max(12,w*0.017)}px sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(count, cx, cy);
+    return r; // 回傳半徑供 hit area 使用
+  }
+
+  if(mapZoom < 1.5){
+    // ══ 模式 A：分區徽章總覽 ══
+    const zoneMap = new Map();
+    visPlants.forEach(p=>{
+      const add = (zone, wx, wy) => {
+        const z = zone||'未分區';
+        if(!zoneMap.has(z)) zoneMap.set(z,[]);
+        zoneMap.get(z).push({wx,wy,plant:p});
+      };
+      if(p.mapX!=null) add(p.zone, p.mapX/100*w, p.mapY/100*h);
+      (p.extraLocations||[]).forEach(loc=>add(loc.zone||p.zone, loc.mapX/100*w, loc.mapY/100*h));
+    });
+
+    if(zoneMap.size === 0){
+      // 尚無植物放置的提示
+      ctx.fillStyle='rgba(29,158,117,0.45)';
+      ctx.font=`${Math.max(12,w*0.018)}px sans-serif`;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('點擊 ＋ 開始將植物放置到地圖', w/2, h/2);
+    } else {
+      zoneMap.forEach((items, zoneName)=>{
+        const cx2 = items.reduce((s,i)=>s+i.wx,0)/items.length;
+        const cy2 = items.reduce((s,i)=>s+i.wy,0)/items.length;
+        // 找出最常見的類別顏色
+        const cc={};
+        items.forEach(i=>{ const c=catColor(i.plant.category); cc[c]=(cc[c]||0)+1; });
+        const color = Object.entries(cc).sort((a,b)=>b[1]-a[1])[0]?.[0]||'#1D9E75';
+        drawZoneBadge(cx2, cy2, zoneName, items.length, color);
+      });
+    }
+
+  } else {
+    // ══ 模式 B：個別 Pin + 聚合泡泡 ══
+    const allPins = [];
+    visPlants.forEach(p=>{
+      if(p.mapX!=null) allPins.push({wx:p.mapX/100*w, wy:p.mapY/100*h, plant:p, isExtra:false});
+      (p.extraLocations||[]).forEach(loc=>{
+        allPins.push({wx:loc.mapX/100*w, wy:loc.mapY/100*h, plant:p, isExtra:true});
+      });
+    });
+    const clusters = clusterPins(allPins);
+    clusters.forEach(grp=>{
+      if(grp.length === 1){
+        const {wx,wy,plant,isExtra}=grp[0];
+        drawPin(wx, wy, catColor(plant.category), plant.emoji, plant.name, isExtra);
+      } else {
+        const cx2 = grp.reduce((s,p)=>s+p.wx,0)/grp.length;
+        const cy2 = grp.reduce((s,p)=>s+p.wy,0)/grp.length;
+        const colors = grp.map(p=>catColor(p.plant.category));
+        const r = drawCluster(cx2, cy2, grp.length, colors);
+        clusterHits.push({cx:cx2, cy:cy2, r:r+6, pins:grp});
+      }
+    });
+  }
+
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
 
+  // 重置 transform，繪製 UI 疊加層（不跟著縮放）
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+  // ── 分區麵包屑（zoom >= 1.5 時顯示）──
+  if(activeZone && mapZoom >= 1.5){
+    const zoneCount = plants.filter(p=>
+      (p.mapX!=null && (p.zone||'未分區')===activeZone) ||
+      (p.extraLocations||[]).some(l=>(l.zone||p.zone||'未分區')===activeZone)
+    ).length;
+    const lbl = `← 全校   |   📍 ${activeZone}（${zoneCount} 種）`;
+    const fs2 = 12;
+    ctx.font = `bold ${fs2}px -apple-system,sans-serif`;
+    const tw2 = ctx.measureText(lbl).width;
+    const bw2 = tw2+24, bh2 = 28;
+    ctx.fillStyle = 'rgba(29,158,117,0.93)';
+    roundRect(ctx, 8, 8, bw2, bh2, 7); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(lbl, 20, 8+bh2/2);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    // 更新 breadcrumb hit 寬度（handleOverlayClick 中的 200 改為動態）
+    // 存在 window 上方便 handleOverlayClick 使用
+    window._breadcrumbW = bw2;
+  }
+
+  if(mapZoom > 1){
+    const lbl = mapZoom < 4 ? `🔍 ×${mapZoom}　雙擊再放大` : `🔍 ×${mapZoom}　雙擊縮回`;
+    const fs = 12;
+    ctx.font = `bold ${fs}px -apple-system,sans-serif`;
+    const tw = ctx.measureText(lbl).width;
+    ctx.fillStyle = 'rgba(29,158,117,0.90)';
+    roundRect(ctx, w - tw - 28, 8, tw + 18, 26, 6);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(lbl, w - 10, 21);
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+  }
+
   // Stats
   const cats = [...new Set(plants.map(p=>p.category))];
-  const zones2 = [...new Set(plants.map(p=>p.zone).filter(Boolean))];
+  const allZonesSet = new Set();
+  plants.forEach(p=>{
+    if(p.zone) allZonesSet.add(p.zone);
+    (p.extraLocations||[]).forEach(l=>{ if(l.zone) allZonesSet.add(l.zone); });
+  });
   document.getElementById('stat-total').textContent = plants.length;
   document.getElementById('stat-cats').textContent = cats.length;
-  document.getElementById('stat-zones').textContent = zones2.length;
+  document.getElementById('stat-zones').textContent = allZonesSet.size;
 
   // Update filter dropdown
   updateCategoryDropdowns();
+}
+
+// ── 產生位置縮圖（裁切地圖並繪製標記）──
+function generateLocationThumb(p){
+  // 取得第一個可用位置（主要 > 第一個額外）
+  let locX = p.mapX, locY = p.mapY, locZone = p.zone;
+  if(locX == null && p.extraLocations && p.extraLocations.length){
+    locX = p.extraLocations[0].mapX;
+    locY = p.extraLocations[0].mapY;
+    locZone = p.extraLocations[0].zone || p.zone;
+  }
+
+  const TW = 220, TH = 140;
+  const tmp = document.createElement('canvas');
+  tmp.width = TW; tmp.height = TH;
+  const c = tmp.getContext('2d');
+
+  if(mapImg && mapImg.complete && mapImg.naturalWidth > 0 && locX != null){
+    const iw = mapImg.naturalWidth, ih = mapImg.naturalHeight;
+    const cropW = iw * 0.35;
+    const cropH = cropW * (TH / TW);
+    const cx = (locX / 100) * iw;
+    const cy = (locY / 100) * ih;
+    let sx = Math.max(0, cx - cropW / 2);
+    let sy = Math.max(0, cy - cropH / 2);
+    sx = Math.min(sx, iw - cropW);
+    sy = Math.min(sy, ih - cropH);
+    c.drawImage(mapImg, sx, sy, cropW, cropH, 0, 0, TW, TH);
+    c.fillStyle = 'rgba(0,0,0,0.07)';
+    c.fillRect(0, 0, TW, TH);
+    // 多個位置：在角落顯示小計數
+    const totalLocs = (p.mapX!=null?1:0) + (p.extraLocations||[]).length;
+    if(totalLocs > 1){
+      const lbl = `+${totalLocs}處`;
+      c.font = 'bold 9px sans-serif'; c.textAlign = 'left';
+      const tw3 = c.measureText(lbl).width + 8;
+      c.fillStyle = 'rgba(29,158,117,0.92)';
+      roundRect(c, 4, 4, tw3, 14, 3); c.fill();
+      c.fillStyle = '#fff'; c.textBaseline = 'top';
+      c.fillText(lbl, 8, 5);
+    }
+  } else if(locX != null){
+    // 格線背景
+    c.fillStyle = '#E8F5EE'; c.fillRect(0, 0, TW, TH);
+    c.strokeStyle = 'rgba(29,158,117,0.2)'; c.lineWidth = 1;
+    for(let x=0;x<TW;x+=18){c.beginPath();c.moveTo(x,0);c.lineTo(x,TH);c.stroke();}
+    for(let y=0;y<TH;y+=18){c.beginPath();c.moveTo(0,y);c.lineTo(TW,y);c.stroke();}
+  } else {
+    return null; // 無位置資料
+  }
+
+  // 標記（置於縮圖正中央）
+  const px = TW / 2, py = TH / 2;
+  const col = catColor(p.category);
+  c.shadowColor = 'rgba(0,0,0,0.5)'; c.shadowBlur = 8; c.shadowOffsetY = 2;
+  // 圓圈
+  c.beginPath(); c.arc(px, py - 10, 13, 0, Math.PI * 2);
+  c.fillStyle = col; c.fill();
+  c.strokeStyle = '#fff'; c.lineWidth = 2.5; c.stroke();
+  // 針尖
+  c.beginPath(); c.moveTo(px-5, py+3); c.lineTo(px+5, py+3); c.lineTo(px, py+13);
+  c.closePath(); c.fillStyle = col; c.fill();
+  c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.stroke();
+  c.shadowBlur = 0; c.shadowOffsetY = 0;
+  // Emoji
+  c.font = '13px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(p.emoji || '🌿', px, py - 10);
+  // 區域標籤（最多 6 字）
+  if(locZone){
+    const zoneLabel = locZone.length > 6 ? locZone.slice(0,5)+'…' : locZone;
+    c.font = 'bold 9px sans-serif'; c.textAlign = 'center';
+    const tw2 = c.measureText(zoneLabel).width + 10;
+    const lx = px - tw2/2, ly = py + 16;
+    // 確保不超出縮圖邊界
+    const clx = Math.max(2, Math.min(lx, TW - tw2 - 2));
+    c.fillStyle = 'rgba(255,255,255,0.92)';
+    c.strokeStyle = col; c.lineWidth = 1;
+    roundRect(c, clx, ly, tw2, 13, 3); c.fill(); c.stroke();
+    c.fillStyle = '#1a1a18'; c.textBaseline = 'top';
+    c.fillText(zoneLabel, clx + tw2/2, ly + 2);
+  }
+  return tmp.toDataURL('image/jpeg', 0.82);
 }
 
 function roundRect(ctx,x,y,w,h,r){
@@ -1003,9 +2210,15 @@ function renderList(){
         </div>
       </div>
       <div class="plant-card-body">
-        <div class="plant-card-loc">📍 ${p.zone||'—'}</div>
+        <div class="plant-card-loc">📍 ${(()=>{
+          const allZ=[];
+          if(p.zone) allZ.push(p.zone);
+          (p.extraLocations||[]).forEach(l=>{if(l.zone&&!allZ.includes(l.zone))allZ.push(l.zone);});
+          return allZ.length>1?allZ.join('・'):(allZ[0]||'—');
+        })()}</div>
         <div class="plant-card-tags">
           <span class="tag">${p.category||'—'}</span>
+          ${(()=>{ const n=(p.mapX!=null?1:0)+(p.extraLocations||[]).length; return n>1?`<span class="tag">📍 ${n}處</span>`:''; })()}
           ${p.lat ? '<span class="tag">📡 GPS</span>' : ''}
         </div>
       </div>
@@ -1030,36 +2243,112 @@ function renderPassports(){
 function passportHTML(p, idx){
   const num = String(idx+1).padStart(3,'0');
   const color = catColor(p.category);
+  const cd = p.careData || {};
+
+  // ── Helpers ──
+  // 超過 16 字的值（通常是句子）取首句或截斷，避免撐開版型
+  function shortVal(val){
+    if(!val) return '—';
+    // 取第一個句號/逗號前的內容，或截到16字
+    const cut = val.replace(/，.*|。.*|,.*|\(.*/,'').trim();
+    return cut.length > 0 ? (cut.length > 16 ? cut.slice(0,15)+'…' : cut) : val.slice(0,16);
+  }
+  function pf(label, val, full=false, raw=false){
+    if(!val) return '';
+    const display = raw ? val : shortVal(val);
+    return `<div${full?' style="grid-column:span 2"':''}>
+      <div class="pf-label">${label}</div>
+      <div class="pf-val" title="${val}">${display}</div>
+    </div>`;
+  }
+  function pfSec(icon, label, fields){
+    const cells = fields.filter(Boolean).join('');
+    if(!cells) return '';
+    return `<div class="pf-section-label">${icon} ${label}</div>
+    <div class="passport-fields">${cells}</div>`;
+  }
+
+  // ── Header 右側：植物名稱 ──
+  const metaParts = [cd.family, cd.aliases].filter(Boolean).join(' · ');
+
+  // ── 植物照片（直接，無標題） ──
+  const plantPhoto = p.photo
+    ? `<img class="pp-plant-photo" src="${p.photo}" alt="${p.name}">`
+    : `<div class="pp-emoji-ph">${p.emoji||'🌿'}</div>`;
+
+  // ── 位置縮圖（直接，無標題） ──
+  const locThumb = generateLocationThumb(p);
+  const locPhoto = locThumb
+    ? `<img class="pp-loc-thumb" src="${locThumb}" alt="位置">`
+    : `<div class="pp-loc-ph"><span style="font-size:20px">📍</span><span>未標記位置</span></div>`;
+
+  // ── Section 1：核心基本資訊（含生長週期） ──
+  const sec1 = pfSec('🏗️','核心基本資訊',[
+    pf('類別',       p.category||'—'),
+    cd.evergreen   ? pf('常綠/落葉', cd.evergreen) : '',
+    cd.origin      ? pf('原產地',   cd.origin)    : '',
+    cd.lifecycle   ? pf('生長週期', cd.lifecycle) : '',
+  ]);
+
+  // ── Section 2：生物特徵 ──
+  const sec2 = (cd.flowerPeriod||cd.fruitPeriod||cd.leafFeature||cd.flowerFeature||cd.fruitFeature||cd.aliases)
+    ? pfSec('🌿','生物特徵',[
+        cd.aliases       ? pf('別名',   cd.aliases,      true) : '',
+        cd.leafFeature   ? pf('葉片',   cd.leafFeature,  true) : '',
+        cd.flowerFeature ? pf('花朵',   cd.flowerFeature,true) : '',
+        cd.fruitFeature  ? pf('果實',   cd.fruitFeature, true) : '',
+        cd.flowerPeriod  ? pf('花期',   cd.flowerPeriod)       : '',
+        cd.fruitPeriod   ? pf('果期',   cd.fruitPeriod)        : '',
+      ]) : '';
+
+  // ── Section 2b：用途（獨立一欄，full-width） ──
+  const sec2b = cd.uses ? pfSec('💡','用途',[pf('',cd.uses,true)]) : '';
+
+  // ── Section 3：照護需求 ──
+  const sec3 = pfSec('🛠️','照護需求',[
+    pf('光照', p.sun||'—'),
+    pf('澆水', p.water||'—'),
+    cd.temperature ? pf('適溫', cd.temperature, true) : '',
+  ]);
+
   return `
   <div class="passport" id="passport-${p.id}">
     <div class="passport-stamp">${p.emoji||'🌿'}</div>
-    <div class="passport-header" style="background:linear-gradient(135deg,${color}dd,${color})">
-      <div>
+
+    <!-- Header：左=學校護照，右=植物名稱 -->
+    <div class="passport-header" style="background:linear-gradient(135deg,${color}cc,${color})">
+      <div class="passport-header-left">
         <div class="passport-school">${t('passportSchool')}</div>
         <div class="passport-title">${t('passportTitle')}</div>
       </div>
-      <div class="passport-number">#${num}</div>
+      <div class="passport-header-right">
+        <div class="pp-hdr-name">${p.name}</div>
+        <div class="pp-hdr-latin">${p.latin||''}</div>
+        ${metaParts ? `<div class="pp-hdr-meta">${metaParts}</div>` : ''}
+        <div class="passport-number">#${num}</div>
+      </div>
     </div>
+
+    <!-- 視覺行：植物照片 ＋ 位置縮圖（無冗餘標題） -->
+    <div class="pp-visual-row">
+      <div class="pp-visual-half">${plantPhoto}</div>
+      <div class="pp-visual-half">${locPhoto}</div>
+    </div>
+
+    <!-- 資料欄位 -->
     <div class="passport-body">
-      <div class="passport-plant-row">
-        <div class="passport-emoji-box">${p.emoji||'🌿'}</div>
-        <div>
-          <div class="passport-pname">${p.name}</div>
-          <div class="passport-platin">${p.latin||'—'}</div>
-        </div>
-      </div>
-      <div class="passport-fields">
-        <div><div class="pf-label">${t('fieldCat')}</div><div class="pf-val">${p.category||'—'}</div></div>
-        <div><div class="pf-label">${t('fieldZone')}</div><div class="pf-val">${p.zone||'—'}</div></div>
-        <div><div class="pf-label">${t('fieldSun')}</div><div class="pf-val">${p.sun||'—'}</div></div>
-        <div><div class="pf-label">${t('fieldWater')}</div><div class="pf-val">${p.water||'—'}</div></div>
-        ${p.lat ? `<div style="grid-column:span 2"><div class="pf-label">GPS</div><div class="pf-val" style="font-size:10px;font-family:monospace">${p.lat}, ${p.lng}</div></div>` : ''}
-      </div>
-      ${p.desc ? `<div style="font-size:11px;color:var(--tx2);line-height:1.5;margin-top:.75rem;padding-top:.75rem;border-top:.5px solid var(--bd)">${p.desc}</div>` : ''}
+      ${sec1}${sec2}${sec2b}${sec3}
+      ${p.desc ? `<div class="passport-desc">${p.desc}</div>` : ''}
     </div>
+
     <div class="passport-footer">
-      <div class="passport-loc-text">📍 ${p.zone||'—'}</div>
-      <div class="passport-qr">🌿</div>
+      <div class="passport-loc-text">${(()=>{
+        const allZ = [];
+        if(p.zone) allZ.push(p.zone);
+        (p.extraLocations||[]).forEach(l=>{ if(l.zone && !allZ.includes(l.zone)) allZ.push(l.zone); });
+        return allZ.length > 1 ? `📍 ${allZ.join('・')}` : `📍 ${allZ[0]||'—'}`;
+      })()}</div>
+      <div class="passport-qr">${p.emoji||'🌿'}</div>
     </div>
   </div>`;
 }
@@ -1091,12 +2380,40 @@ body{font-family:-apple-system,Arial,sans-serif;padding:20px;background:#f5f5f5}
 .passport-emoji-box{width:52px;height:52px;background:#E1F5EE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:1px solid #9FE1CB}
 .passport-pname{font-size:16px;font-weight:700}
 .passport-platin{font-size:11px;color:#888;font-style:italic;margin-top:2px}
-.passport-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
-.pf-label{font-size:10px;color:#888;margin-bottom:2px}
-.pf-val{font-size:12px;font-weight:600}
-.passport-footer{background:#E1F5EE;padding:.6rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #9FE1CB}
+/* ── Fields ── */
+.passport-fields{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.pf-label{font-size:9px;color:#aaa;margin-bottom:1px}
+.pf-val{font-size:12px;font-weight:600;color:#1a1a18}
+.pf-section-label{font-size:9px;font-weight:700;color:#aaa;letter-spacing:.05em;margin:.5rem 0 .25rem;display:flex;align-items:center;gap:5px}
+.pf-section-label::after{content:'';flex:1;height:.5px;background:#eee}
+.passport-desc{font-size:10px;color:#555;line-height:1.55;margin-top:.4rem;padding-top:.4rem;border-top:1px solid #eee}
+/* ── Visual row ── */
+.pp-visual-row{display:flex;gap:5px;padding:5px 5px 4px}
+.pp-visual-half{flex:1;min-width:0}
+.pp-plant-photo,.pp-loc-thumb{width:100%;height:118px;object-fit:cover;border-radius:6px;display:block;border:1px solid #ddd;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pp-emoji-ph{width:100%;height:118px;border-radius:6px;border:1px solid #9FE1CB;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:50px}
+.pp-loc-ph{width:100%;height:118px;border-radius:6px;border:1px solid #ddd;background:#f0f0f0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#aaa;font-size:11px;gap:4px}
+/* ── Header name ── */
+.passport-header-left{flex-shrink:0}
+.passport-school{font-size:10px;opacity:.72}
+.passport-title{font-size:13px;font-weight:700}
+.passport-header-right{margin-left:auto;text-align:right;min-width:0;max-width:65%}
+.pp-hdr-name{font-size:17px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp-hdr-latin{font-size:10px;opacity:.75;font-style:italic;margin-top:2px}
+.pp-hdr-meta{font-size:9px;opacity:.6;margin-top:2px}
+.passport-number{font-size:9px;opacity:.4;font-family:monospace;margin-top:5px}
+/* ── Footer ── */
+.passport-footer{background:#E1F5EE;padding:.5rem .9rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #9FE1CB;margin-top:auto}
 .passport-loc-text{font-size:11px;color:#0F6E56;font-weight:500}
-@media print{body{padding:0;background:#fff}@page{margin:15mm;size:A4}.passport-grid{grid-template-columns:repeat(2,1fr)}}
+/* ── Print ── */
+@media print{
+  body{padding:0;background:#fff}
+  @page{size:A4 portrait;margin:10mm}
+  .passport-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .passport{min-height:0;height:133mm;display:flex;flex-direction:column;break-inside:avoid;page-break-inside:avoid}
+  .passport-body{flex:1}
+  .passport-header,.pp-plant-photo,.pp-loc-thumb,.pp-emoji-ph,.pp-loc-ph{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style></head><body>
 <div style="text-align:center;margin-bottom:20px"><h1 style="font-size:20px;color:#1D9E75">🌿 校園植物護照 · Plant Passports</h1><p style="color:#888;font-size:13px;margin-top:4px">列印後發給學生，進行植物尋寶活動</p></div>
 <div class="passport-grid">${passportsHTML}</div>
@@ -1114,15 +2431,46 @@ function renderHunt(){
   const empty = document.getElementById('hunt-empty');
   if(!plants.length){ grid.innerHTML=''; empty.classList.remove('hidden'); renderHuntProgress(); return; }
   empty.classList.add('hidden');
+
+  const clueRow = (icon, label, text, blur) =>
+    text ? `<div class="hunt-clue-row${blur?' hunt-blur':''}">
+      <span style="flex-shrink:0">${icon}</span>
+      <span><b>${label}</b>${text}</span>
+    </div>` : '';
+
   grid.innerHTML = plants.map(p=>{
     const found = huntFound[p.id];
-    return `<div class="hunt-card ${found?'found':''}" onclick="toggleHunt('${p.id}')">
-      <div class="hunt-card-emoji">${found ? p.emoji||'🌿' : '❓'}</div>
-      <div class="hunt-card-name">${found ? p.name : '???'}</div>
-      ${p.hint ? `<div class="hunt-card-hint">${t('hintLabel')} ${p.hint}</div>` : ''}
-      <div class="hunt-card-secret">${p.zone||'—'}</div>
-      ${found ? `<div class="found-badge">✓ ${t('huntFound')}</div>` : `<div style="font-size:10px;color:var(--tx3);margin-top:4px">${t('huntHover')}</div>`}
-    </div>`;
+    const rd = p.riddleData;
+
+    let body = '';
+    if(found){
+      // 已找到：全部揭曉
+      body = `
+        <div class="hunt-card-emoji">${p.emoji||'🌿'}</div>
+        <div class="hunt-card-name">${p.name}</div>
+        ${rd ? `
+          ${clueRow('🌸','花語：', rd.flowerLang, false)}
+          ${clueRow('💬','俗語：', rd.folklore, false)}
+          ${clueRow('✨','趣聞：', rd.funFact, false)}
+        ` : (p.hint ? `<div class="hunt-card-hint">${t('hintLabel')} ${p.hint}</div>` : '')}
+        <div class="hunt-card-secret">${p.zone||'—'}</div>
+        <div class="found-badge">✓ ${t('huntFound')}</div>`;
+    } else {
+      // 未找到：謎語 + 模糊線索
+      body = `
+        <div class="hunt-card-emoji">❓</div>
+        <div class="hunt-card-name">???</div>
+        ${rd ? `
+          ${rd.riddle ? `<div class="hunt-riddle">🎭 ${rd.riddle}</div>` : ''}
+          ${clueRow('🌸','花語：', rd.flowerLang, true)}
+          ${clueRow('💬','俗語：', rd.folklore, true)}
+          ${clueRow('✨','趣聞：', rd.funFact, true)}
+        ` : (p.hint ? `<div class="hunt-card-hint">${t('hintLabel')} ${p.hint}</div>` : '')}
+        <div class="hunt-card-secret">${p.zone||'—'}</div>
+        <div style="font-size:10px;color:var(--tx3);margin-top:5px">${t('huntHover')}</div>`;
+    }
+
+    return `<div class="hunt-card ${found?'found':''}" onclick="toggleHunt('${p.id}')">${body}</div>`;
   }).join('');
   renderHuntProgress();
 }
@@ -1149,6 +2497,59 @@ function resetHunt(){
   huntFound = {};
   saveHunt();
   renderHunt();
+}
+
+async function generateHuntRiddles(){
+  const apiKey = localStorage.getItem('gemini-api-key')||localStorage.getItem('apiKey')||'';
+  if(!apiKey){ alert('請先到「設定」設定 Gemini API 金鑰'); return; }
+  if(!plants.length){ alert('請先新增植物'); return; }
+
+  const btn = document.getElementById('gen-riddle-btn');
+  btn.disabled = true; btn.textContent = '✨ 生成中…';
+
+  const langStr = lang==='en'?'English':lang==='vi'?'Vietnamese':'Traditional Chinese';
+  const plantList = plants.map((p,i)=>
+    `${i+1}. ${p.name}（${p.latin||''}）類別：${p.category||''}${p.desc?'，'+p.desc:''}`
+  ).join('\n');
+
+  const prompt = `你是一位很有創意、懂植物的老師，擅長說故事和出謎語。以下是幾種校園植物：
+
+${plantList}
+
+請為每種植物生成有趣的尋寶謎語資訊，回傳 ONLY a valid JSON array（no markdown），順序與上面完全一致：
+[
+  {
+    "riddle": "一段謎語或童詩（3-4句），不能直接說出植物名稱，要描述外形/顏色/氣味/習性/傳說，充滿神秘感，適合國中小學生",
+    "flowerLang": "花語（2-4個詞，用・隔開，例如：永恆的生命力・無私的奉獻・希望）",
+    "folklore": "一句台灣民間俚語、諺語或有趣傳說，要和這植物有直接關聯（例如：台語俗諺、民間偏方故事、老一輩的說法）",
+    "funFact": "一個令人意外的科學事實或歷史小故事，1-2句，要讓人說『哇，真的假的！』"
+  }
+]
+語言：${langStr}。謎語要生動有趣，不要太學術，讓學生想去找這株植物！`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+    const resp = await fetch(url, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.75, maxOutputTokens:3000}
+      })
+    });
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||'API Error '+resp.status); }
+    const data = await resp.json();
+    const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const results = JSON.parse(raw);
+    if(!Array.isArray(results)) throw new Error('回傳格式錯誤');
+    results.forEach((r,i)=>{ if(plants[i]) plants[i].riddleData = r; });
+    savePlants();
+    renderHunt();
+    showToast('✅ 謎語已為所有植物生成！');
+  } catch(err){
+    alert('生成失敗：' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ AI 生成謎語';
+  }
 }
 
 function exportHuntCard(){
@@ -1214,15 +2615,18 @@ function openAddForm(presetX, presetY){
   document.getElementById('photo-upload-zone').classList.remove('hidden');
   document.getElementById('photo-preview').classList.add('hidden');
   document.getElementById('photo-preview').src = '';
+  document.getElementById('crop-ui').classList.add('hidden');
   document.getElementById('ai-loading').classList.add('hidden');
   document.getElementById('ai-error').classList.add('hidden');
   document.getElementById('analyze-btn').disabled = true;
   document.getElementById('photo-input').value = '';
+  crop.fullSrc = ''; crop.origImg = null;
   // check API key
   const apiKey = localStorage.getItem('gemini-api-key') || localStorage.getItem('apiKey') || '';
   document.getElementById('no-api-warn').classList.toggle('hidden', !!apiKey);
   goStep(1);
   document.getElementById('form-title').textContent = lang==='en'?'Add Campus Plant':lang==='vi'?'Thêm Cây':'新增校園植物';
+  updateZoneSelect();
   document.getElementById('form-overlay').classList.remove('hidden');
 }
 
@@ -1236,12 +2640,18 @@ function triggerPhotoGallery(){
 }
 
 function skipToManual(){
+  // 若已有裁切照片，先儲存縮圖
+  if(crop.fullSrc){ const c = captureCrop(); if(c) currentPhotoThumb = c; }
   clearFormFields();
   goStep(2);
 }
 
-// Photo input handler
+// Photo input handler + Crop drag setup
 document.addEventListener('DOMContentLoaded', ()=>{
+  // Init zones & map image
+  loadZones();
+  loadMapImage();
+
   const fi = document.getElementById('photo-input');
   if(fi) fi.addEventListener('change', e=>{
     if(!e.target.files[0]) return;
@@ -1253,33 +2663,148 @@ document.addEventListener('DOMContentLoaded', ()=>{
     dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
     dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('drag'); if(e.dataTransfer.files[0]) handlePhotoFile(e.dataTransfer.files[0]); });
   }
+
+  // ── 裁切容器拖移事件 ──
+  const cc = document.getElementById('crop-container');
+  if(cc){
+    // Mouse
+    cc.addEventListener('mousedown', e=>{
+      if(!crop.fullSrc) return;
+      crop.dragging = true; crop.sx = e.clientX; crop.sy = e.clientY;
+      crop.ox = crop.imgX; crop.oy = crop.imgY;
+      cc.classList.add('dragging'); e.preventDefault();
+    });
+    document.addEventListener('mousemove', e=>{
+      if(!crop.dragging) return;
+      crop.imgX = crop.ox + (e.clientX - crop.sx);
+      crop.imgY = crop.oy + (e.clientY - crop.sy);
+      clampCrop(); applyCropPos();
+    });
+    document.addEventListener('mouseup', ()=>{
+      if(crop.dragging){ crop.dragging = false; cc.classList.remove('dragging'); }
+    });
+    // Touch
+    cc.addEventListener('touchstart', e=>{
+      if(!crop.fullSrc) return;
+      crop.dragging = true;
+      crop.sx = e.touches[0].clientX; crop.sy = e.touches[0].clientY;
+      crop.ox = crop.imgX; crop.oy = crop.imgY;
+      e.preventDefault();
+    }, {passive:false});
+    cc.addEventListener('touchmove', e=>{
+      if(!crop.dragging) return;
+      crop.imgX = crop.ox + (e.touches[0].clientX - crop.sx);
+      crop.imgY = crop.oy + (e.touches[0].clientY - crop.sy);
+      clampCrop(); applyCropPos(); e.preventDefault();
+    }, {passive:false});
+    cc.addEventListener('touchend', ()=>{ crop.dragging = false; });
+  }
 });
 
 let currentPhotoThumb = null; // compressed data URL for storage
+
+// ===== CROP UI STATE =====
+const crop = {
+  fullSrc: '',        // original full-res data URL
+  origImg: null,      // already-loaded Image element (for canvas capture)
+  imgEl: null,        // <img> inside crop container
+  contEl: null,       // crop container div
+  imgX: 0, imgY: 0,  // current image top-left within container
+  imgW: 0, imgH: 0,  // scaled image size
+  contW: 0, contH: 0, // container size
+  dragging: false,
+  sx: 0, sy: 0,      // drag start screen pos
+  ox: 0, oy: 0,      // drag start image offset
+};
+
+function initCropUI(fullDataUrl){
+  crop.fullSrc = fullDataUrl;
+  const cont = document.getElementById('crop-container');
+  const imgEl = document.getElementById('crop-img');
+  if(!cont || !imgEl) return;
+  crop.contEl = cont; crop.imgEl = imgEl;
+
+  const tmpImg = new Image();
+  tmpImg.onload = ()=>{
+    crop.origImg = tmpImg; // keep reference for captureCrop
+    // Container width from DOM (may not be laid out yet, fallback to form width)
+    const cw = cont.parentElement.offsetWidth || 320;
+    const ch = 220;
+    crop.contW = cw; crop.contH = ch;
+
+    // Scale image to COVER the container (no empty space)
+    const scale = Math.max(cw / tmpImg.naturalWidth, ch / tmpImg.naturalHeight);
+    crop.imgW = Math.round(tmpImg.naturalWidth  * scale);
+    crop.imgH = Math.round(tmpImg.naturalHeight * scale);
+
+    // Center
+    crop.imgX = Math.round((cw - crop.imgW) / 2);
+    crop.imgY = Math.round((ch - crop.imgH) / 2);
+
+    imgEl.src = fullDataUrl;
+    imgEl.style.width  = crop.imgW + 'px';
+    imgEl.style.height = crop.imgH + 'px';
+    applyCropPos();
+
+    document.getElementById('photo-upload-zone').classList.add('hidden');
+    document.getElementById('photo-preview').classList.add('hidden');
+    document.getElementById('crop-ui').classList.remove('hidden');
+    document.getElementById('analyze-btn').disabled = false;
+    document.getElementById('ai-error').classList.add('hidden');
+  };
+  tmpImg.src = fullDataUrl;
+}
+
+function applyCropPos(){
+  if(!crop.imgEl) return;
+  crop.imgEl.style.left = crop.imgX + 'px';
+  crop.imgEl.style.top  = crop.imgY + 'px';
+}
+
+function clampCrop(){
+  // Image must always cover the container (no black bars)
+  crop.imgX = Math.min(0, Math.max(crop.contW - crop.imgW, crop.imgX));
+  crop.imgY = Math.min(0, Math.max(crop.contH - crop.imgH, crop.imgY));
+}
+
+function resetCrop(){
+  crop.imgX = Math.round((crop.contW - crop.imgW) / 2);
+  crop.imgY = Math.round((crop.contH - crop.imgH) / 2);
+  clampCrop(); applyCropPos();
+}
+
+function reopenPhoto(){
+  document.getElementById('crop-ui').classList.add('hidden');
+  document.getElementById('photo-upload-zone').classList.remove('hidden');
+  document.getElementById('analyze-btn').disabled = true;
+  document.getElementById('photo-input').value = '';
+  crop.fullSrc = ''; crop.origImg = null;
+  currentPhotoB64 = null; currentPhotoThumb = null;
+}
+
+function captureCrop(){
+  const src = crop.origImg;
+  if(!src || !src.naturalWidth) return null;
+  // Map container crop region back to original image coords
+  const scale = crop.imgW / src.naturalWidth;  // display scale factor
+  const origX =  -crop.imgX / scale;
+  const origY =  -crop.imgY / scale;
+  const origW =   crop.contW / scale;
+  const origH =   crop.contH / scale;
+  // Output: max 400px wide, same aspect as crop box
+  const outW = 400, outH = Math.round(400 * crop.contH / crop.contW);
+  const c = document.createElement('canvas');
+  c.width = outW; c.height = outH;
+  c.getContext('2d').drawImage(src, origX, origY, origW, origH, 0, 0, outW, outH);
+  return c.toDataURL('image/jpeg', 0.78);
+}
 
 function handlePhotoFile(file){
   const reader = new FileReader();
   reader.onload = ev=>{
     const fullDataUrl = ev.target.result;
     currentPhotoB64 = fullDataUrl.split(',')[1];
-    document.getElementById('photo-preview').src = fullDataUrl;
-    document.getElementById('photo-preview').classList.remove('hidden');
-    document.getElementById('photo-upload-zone').classList.add('hidden');
-    document.getElementById('analyze-btn').disabled = false;
-    document.getElementById('ai-error').classList.add('hidden');
-    // Compress to thumbnail for storage (~400px wide, JPEG 0.72)
-    const img = new Image();
-    img.onload = ()=>{
-      const maxW = 400, maxH = 300;
-      let w = img.width, h = img.height;
-      if(w > maxW){ h = h * maxW / w; w = maxW; }
-      if(h > maxH){ w = w * maxH / h; h = maxH; }
-      const c = document.createElement('canvas');
-      c.width = Math.round(w); c.height = Math.round(h);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      currentPhotoThumb = c.toDataURL('image/jpeg', 0.72);
-    };
-    img.src = fullDataUrl;
+    initCropUI(fullDataUrl);
   };
   reader.readAsDataURL(file);
 }
@@ -1288,6 +2813,10 @@ async function analyzePhoto(){
   const apiKey = localStorage.getItem('gemini-api-key') || localStorage.getItem('apiKey') || '';
   if(!apiKey){ alert('請先設定 Gemini API 金鑰'); return; }
   if(!currentPhotoB64){ alert('請先選擇照片'); return; }
+
+  // 先從裁切 UI 捕捉縮圖（傳入 AI 的仍是原圖）
+  const cropped = captureCrop();
+  if(cropped) currentPhotoThumb = cropped;
 
   document.getElementById('ai-loading').classList.remove('hidden');
   document.getElementById('analyze-btn').disabled = true;
@@ -1298,24 +2827,47 @@ async function analyzePhoto(){
   const iv = setInterval(()=>{ document.getElementById('ai-status-txt').textContent = msgs[mi++%msgs.length]; }, 1800);
 
   const langStr = lang==='en'?'English':lang==='vi'?'Vietnamese':'Traditional Chinese';
-  const prompt = `You are a botanist expert. Identify this plant and return ONLY a JSON object (no markdown) in ${langStr} for all text values:
+  const prompt = `You are an expert botanist specializing in East Asian and Southeast Asian flora, with deep knowledge of plants commonly found in Taiwan and Vietnam school campuses (tropical/subtropical climate zone).
+
+STEP 1 — Observe carefully: Look at the flower color, shape, petal count, leaf shape/texture/color, stem characteristics, overall size and growth habit.
+STEP 2 — Identify: Based on your observations, determine the most likely species. Consider common campus plants in Taiwan/Southeast Asia first.
+STEP 3 — Return ONLY a JSON object (no markdown, no explanation) in ${langStr} for all text values:
+
 {
-  "name": "common name",
+  "observedFeatures": "1-2 sentences describing what you actually see in the image: flower color/shape, leaf characteristics, distinctive features",
+  "name": "most likely common name",
   "latin": "scientific name",
   "emoji": "one representative emoji",
-  "confidence": "high/medium/low",
+  "confidence": 85,
+  "alternatives": [
+    {"name": "alternative common name", "latin": "scientific name", "confidence": 10},
+    {"name": "another alternative", "latin": "scientific name", "confidence": 5}
+  ],
   "category": "one of: 喬木/灌木/花卉/藤蔓/蕨類/草本/其他",
   "sun": "sunlight requirements (1 sentence)",
   "water": "watering frequency (1 sentence)",
   "desc": "2-sentence introduction",
   "careData": {
+    "family": "plant family name in Chinese e.g. 天南星科",
+    "aliases": "common aliases separated by · e.g. 魔鬼藤·綠蘿",
+    "evergreen": "常綠 or 落葉 or 半落葉",
+    "flowerPeriod": "flowering season e.g. 春至夏季（3–6月）, or empty string",
+    "fruitPeriod": "fruiting season or empty string if not applicable",
+    "flowerFeature": "花朵外形、顏色、香氣等特徵（1-2句，若無明顯花朵填空字串）",
+    "leafFeature": "葉片形狀、顏色、質地、大小等特徵（1-2句）",
+    "fruitFeature": "果實形狀、顏色、大小等特徵（1-2句，若無果實填空字串）",
+    "uses": "主要用途，如觀賞、食用、藥用、淨化空氣、工業用等（1-2句）",
     "origin": "place of origin",
     "lifecycle": "annual/biennial/perennial",
     "plantSeason": "best planting season",
     "temperature": "ideal temperature range",
-    "soil": "soil requirements",
-    "fertilizer": "fertilizing schedule",
+    "soil": "soil type and requirements (1 sentence)",
+    "fertilizer": "fertilizing schedule (1 sentence)",
     "naturalFertilizer": ["tip 1 with specific material","tip 2","tip 3"],
+    "wateringDetail": "specific watering tips for this plant (1-2 sentences): frequency, amount, special notes",
+    "lightDetail": "specific light & placement tips for this plant (1-2 sentences): ideal position, rotation advice",
+    "ventilationHumidity": "specific ventilation and humidity needs for this plant (1-2 sentences)",
+    "maintenance": "specific daily care tips for this plant (1-2 sentences): pruning, cleaning, pest prevention",
     "problems": [
       {"name":"problem name","severity":"嚴重 or 注意 or 提示","symptoms":"visible symptoms","treatment":"how to treat"},
       {"name":"problem name 2","severity":"注意","symptoms":"...","treatment":"..."},
@@ -1331,7 +2883,13 @@ async function analyzePhoto(){
     }
   }
 }
-If no plant detected: {"error":"no_plant"}. Category must be one of those exact Chinese values regardless of output language. Severity in problems must always be one of: 嚴重, 注意, 提示.`;
+
+Rules:
+- "confidence" is an INTEGER 0–100 representing your certainty this identification is correct
+- "alternatives" must have 2 entries; if no good alternatives exist use confidence 0
+- Category must be one of the exact Chinese values regardless of output language
+- Severity in problems must always be one of: 嚴重, 注意, 提示
+- If no plant is visible in the image: {"error":"no_plant"}`;
 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
@@ -1364,12 +2922,53 @@ If no plant detected: {"error":"no_plant"}. Category must be one of those exact 
 }
 
 let pendingCareData = null;
+let pendingAIResult = null; // 保存完整 AI 回傳，供 applyAlternative 使用
+
 function fillAIData(r){
+  pendingAIResult = r;
   document.getElementById('ai-emoji').textContent = r.emoji||'🌿';
   document.getElementById('ai-name-display').textContent = r.name||'';
   document.getElementById('ai-latin-display').textContent = r.latin||'';
-  const confMap = {high:'辨識度高',medium:'辨識度中',low:'辨識度低'};
-  document.getElementById('ai-conf').textContent = confMap[r.confidence]||r.confidence||'';
+
+  // ── 信心度進度條 ──
+  const confRaw = typeof r.confidence === 'number' ? r.confidence
+    : ({high:88, medium:60, low:32}[r.confidence] ?? 55); // 相容舊版 high/medium/low
+  const pct = Math.max(0, Math.min(100, confRaw));
+  const barEl = document.getElementById('ai-conf-bar');
+  const pctEl = document.getElementById('ai-conf-pct');
+  const cls = pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+  barEl.style.width = pct+'%';
+  barEl.className = 'conf-bar-fill '+cls;
+  pctEl.textContent = pct+'%';
+  pctEl.className = 'conf-bar-pct '+cls;
+
+  // ── 觀察特徵框 ──
+  const featBox = document.getElementById('ai-features-box');
+  const featTxt = document.getElementById('ai-features-text');
+  if(r.observedFeatures){
+    featTxt.textContent = r.observedFeatures;
+    featBox.classList.remove('hidden');
+  } else {
+    featBox.classList.add('hidden');
+  }
+
+  // ── 備選物種 ──
+  const altWrap = document.getElementById('ai-alt-wrap');
+  const altList = document.getElementById('ai-alt-list');
+  const alts = (r.alternatives||[]).filter(a=>a.name && a.confidence > 0);
+  if(alts.length){
+    altList.innerHTML = alts.map((a,i)=>`
+      <button class="ai-alt-btn" onclick="applyAlternative(${i})">
+        <span>${a.name}</span>
+        <span class="alt-pct">${a.latin||''}</span>
+        <span class="alt-pct">${a.confidence}%</span>
+      </button>`).join('');
+    altWrap.classList.remove('hidden');
+  } else {
+    altWrap.classList.add('hidden');
+  }
+
+  // ── 表單填入 ──
   document.getElementById('f-name').value = r.name||'';
   document.getElementById('f-latin').value = r.latin||'';
   document.getElementById('f-emoji').value = r.emoji||'';
@@ -1381,6 +2980,30 @@ function fillAIData(r){
   for(let i=0;i<catEl.options.length;i++){
     if(catEl.options[i].value===r.category){ catEl.selectedIndex=i; break; }
   }
+}
+
+// 切換到備選物種（僅更新名稱、學名、信心度；其他資料保持原樣）
+function applyAlternative(idx){
+  if(!pendingAIResult) return;
+  const alt = (pendingAIResult.alternatives||[])[idx];
+  if(!alt) return;
+  // 更新顯示名稱
+  document.getElementById('ai-name-display').textContent = alt.name||'';
+  document.getElementById('ai-latin-display').textContent = alt.latin||'';
+  document.getElementById('f-name').value = alt.name||'';
+  document.getElementById('f-latin').value = alt.latin||'';
+  // 更新信心度
+  const pct = Math.max(0, Math.min(100, alt.confidence||0));
+  const cls = pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
+  const barEl = document.getElementById('ai-conf-bar');
+  const pctEl = document.getElementById('ai-conf-pct');
+  barEl.style.width = pct+'%';
+  barEl.className = 'conf-bar-fill '+cls;
+  pctEl.textContent = pct+'%';
+  pctEl.className = 'conf-bar-pct '+cls;
+  // 清除特徵框（備選無 observedFeatures）
+  document.getElementById('ai-features-box').classList.add('hidden');
+  showToast(`已切換為「${alt.name}」，其他資料請手動確認`);
 }
 
 function clearForm(){
@@ -1530,15 +3153,40 @@ function showPlantDetail(id){
   document.getElementById('m-basic-grid').innerHTML = basicCells.map(([l,v])=>
     `<div class="basic-cell"><div class="basic-cell-label">${l}</div><div class="basic-cell-val">${v}</div></div>`
   ).join('');
-  const locRows = [
-    p.zone ? ['位置', p.zone] : null,
-    p.lat  ? ['GPS', `${p.lat}${p.lng?', '+p.lng:''}`] : null,
-    p.hint ? ['提示', p.hint] : null,
-  ].filter(Boolean);
-  document.getElementById('m-loc-label').style.display = locRows.length ? '' : 'none';
-  document.getElementById('m-loc-info').innerHTML = locRows.map(([k,v])=>
-    `<div class="info-row"><div class="info-key">${k}</div><div class="info-val">${v}</div></div>`
-  ).join('');
+  renderMorphTab(p); // 別名 + 形態特徵 + 用途
+  // ── 位置資訊（支援多地點）──
+  const allLocs = [];
+  if(p.mapX != null) allLocs.push({id:'_primary', mapX:p.mapX, mapY:p.mapY, zone:p.zone||'', isPrimary:true});
+  (p.extraLocations||[]).forEach(loc=>allLocs.push({...loc, isPrimary:false}));
+
+  document.getElementById('m-loc-label').style.display = '';
+  let locHTML = '';
+  if(allLocs.length){
+    locHTML += `<div style="font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.04em;margin-bottom:.3rem">📍 地圖位置（${allLocs.length} 處）</div>`;
+    locHTML += allLocs.map(loc=>`
+      <div class="loc-list-item">
+        <div style="flex:1;font-size:12px;font-weight:600;color:var(--tx)">${loc.zone||'（未命名）'}</div>
+        <div style="font-size:10px;color:var(--tx3)">X:${loc.mapX} Y:${loc.mapY}</div>
+        ${loc.isPrimary
+          ? `<span style="font-size:10px;color:var(--g600);font-weight:600;padding:1px 5px;background:var(--g50);border-radius:4px">主</span>`
+          : `<button class="btn" style="padding:2px 7px;font-size:11px;border-color:var(--r400);color:var(--r400)" onclick="removeExtraLocation('${p.id}','${loc.id}')">🗑️</button>`}
+      </div>`).join('');
+  }
+  // 新增位置輸入列
+  const zoneOpts = campusZones.map(z=>`<option value="${z}">${z}</option>`).join('');
+  locHTML += `<div style="display:flex;gap:6px;align-items:center;margin-top:.5rem;flex-wrap:wrap">
+    <select class="form-input" id="extra-zone-input"
+      style="flex:1;min-width:120px;font-size:12px;padding:6px 10px">
+      <option value="">📍 選擇區域（可選）</option>
+      ${zoneOpts}
+    </select>
+    <button class="btn primary" style="font-size:12px;padding:6px 10px;white-space:nowrap"
+      onclick="startExtraLocMode('${p.id}')">📍 ${allLocs.length?'新增位置':'放到地圖'}</button>
+  </div>`;
+  // GPS + 提示
+  if(p.lat) locHTML += `<div class="info-row" style="margin-top:.3rem"><div class="info-key">GPS</div><div class="info-val">${p.lat}${p.lng?', '+p.lng:''}</div></div>`;
+  if(p.hint) locHTML += `<div class="info-row"><div class="info-key">提示</div><div class="info-val">${p.hint}</div></div>`;
+  document.getElementById('m-loc-info').innerHTML = locHTML;
   document.getElementById('m-desc').textContent = p.desc||'';
 
   // --- 照護方式 tab ---
@@ -1554,34 +3202,144 @@ function showPlantDetail(id){
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
 
+function renderMorphTab(p){
+  const cd = p.careData || {};
+  const el = document.getElementById('m-morph');
+  if(!el) return;
+
+  // 收集有資料的列
+  const rows = [];
+  if(cd.aliases)      rows.push({icon:'🏷️', label:'別名',    val:cd.aliases});
+  if(cd.leafFeature)  rows.push({icon:'🍃', label:'葉片特徵', val:cd.leafFeature});
+  if(cd.flowerFeature)rows.push({icon:'🌸', label:'花朵特徵', val:cd.flowerFeature});
+  if(cd.fruitFeature) rows.push({icon:'🍎', label:'果實特徵', val:cd.fruitFeature});
+  if(cd.uses)         rows.push({icon:'💡', label:'用途',     val:cd.uses});
+
+  if(!rows.length){ el.innerHTML = ''; return; }
+
+  el.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;
+      letter-spacing:.06em;margin:.6rem 0 .35rem;display:flex;align-items:center;gap:5px">
+      🌿 生物特徵與用途
+      <span style="flex:1;height:.5px;background:var(--bd);display:block"></span>
+    </div>
+    ${rows.map(r=>`
+      <div class="info-row" style="align-items:flex-start">
+        <div class="info-key" style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <span>${r.icon}</span><span>${r.label}</span>
+        </div>
+        <div class="info-val" style="font-weight:400;color:var(--tx2);line-height:1.55">${r.val}</div>
+      </div>`).join('')}
+  `;
+}
+
 function renderCareTab(p){
   const cd = p.careData || {};
-  const hasCare = p.sun||p.water||cd.temperature||cd.soil||cd.fertilizer;
+  const hasCare = p.sun||p.water||cd.temperature||cd.soil||cd.fertilizer
+    ||cd.wateringDetail||cd.lightDetail||cd.ventilationHumidity||cd.maintenance;
   if(!hasCare){
     document.getElementById('m-care-content').innerHTML = fetchCareBoxHTML(p.id);
     return;
   }
-  const items = [
-    p.sun       ? {icon:'☀️', bg:'#FFF9E6', title:'光照需求', desc:p.sun} : null,
-    p.water     ? {icon:'💧', bg:'#EBF5FB', title:'澆水',     desc:p.water} : null,
-    cd.temperature ? {icon:'🌡️', bg:'#FEF0F0', title:'溫度',  desc:cd.temperature} : null,
-    cd.soil        ? {icon:'🪴', bg:'#F0F9F4', title:'土壤',  desc:cd.soil} : null,
-    cd.fertilizer  ? {icon:'🌱', bg:'#F0F9F4', title:'施肥計畫', desc:cd.fertilizer} : null,
-  ].filter(Boolean);
-  let html = items.map(it=>
-    `<div class="care-item">
-      <div class="care-icon" style="background:${it.bg}">${it.icon}</div>
-      <div><div class="care-title">${it.title}</div><div class="care-desc">${it.desc}</div></div>
-    </div>`
-  ).join('');
-  if(cd.naturalFertilizer && cd.naturalFertilizer.length){
-    html += `<div class="nat-fert-box">
-      <div class="nat-fert-title">🌿 自製天然肥料</div>
-      ${cd.naturalFertilizer.map(s=>`<div class="nat-fert-li"><span>·</span><span>${s}</span></div>`).join('')}
-    </div>`;
+
+  function plantNote(text){
+    if(!text) return '';
+    return `<div class="care-plant-note"><div class="care-plant-note-label">📌 本植物建議</div>${text}</div>`;
   }
-  if(!hasCare) html += fetchCareBoxHTML(p.id);
-  document.getElementById('m-care-content').innerHTML = html;
+
+  // ── 1. 澆水技巧 ──────────────────────────────────────
+  const s1 = `<div class="care-section">
+    <div class="care-section-header">
+      <div class="care-section-icon" style="background:#EBF5FB">💧</div>
+      <div class="care-section-meta">
+        <div class="care-section-title">澆水技巧</div>
+        ${p.water?`<div class="care-section-sub">${p.water}</div>`:''}
+      </div>
+    </div>
+    <div class="care-section-body">
+      <div class="care-tip-row"><b>原則：</b><span>「不乾不澆，澆則澆透」，避免根部長時間積水。</span></div>
+      <div class="care-tip-row"><b>判斷法：</b><span>手指插入土中約一指節深，感覺乾燥才澆水；盆栽變輕也表示缺水。</span></div>
+      <div class="care-tip-row"><b>觀察工具：</b><span>可使用土壤水分計（如 Sustee）依顏色判斷是否需要澆水。</span></div>
+      <div class="care-tip-row"><b>澆水方式：</b><span>均勻澆灌至盆底出水，切忌只澆表面。</span></div>
+      ${plantNote(cd.wateringDetail)}
+    </div>
+  </div>`;
+
+  // ── 2. 光照與擺放位置 ────────────────────────────────
+  const s2 = `<div class="care-section">
+    <div class="care-section-header">
+      <div class="care-section-icon" style="background:#FFF9E6">☀️</div>
+      <div class="care-section-meta">
+        <div class="care-section-title">光照與擺放位置</div>
+        ${p.sun?`<div class="care-section-sub">${p.sun}</div>`:''}
+      </div>
+    </div>
+    <div class="care-section-body">
+      <div class="care-tip-row"><b>觀葉植物：</b><span>喜明亮散射光，忌強光直射，適合窗邊明亮處。</span></div>
+      <div class="care-tip-row"><b>多肉植物：</b><span>需充足陽光，朝南窗戶最合適，光照不足易徒長。</span></div>
+      <div class="care-tip-row"><b>調節方式：</b><span>可定時轉動盆栽方向讓植物均勻生長；光線不足時可用植物燈補充。</span></div>
+      ${plantNote(cd.lightDetail)}
+    </div>
+  </div>`;
+
+  // ── 3. 通風與空氣濕度 ────────────────────────────────
+  const tempNote = cd.temperature ? `<div class="care-tip-row"><b>適宜溫度：</b><span>${cd.temperature}</span></div>` : '';
+  const s3 = `<div class="care-section">
+    <div class="care-section-header">
+      <div class="care-section-icon" style="background:#E8F4FD">🌬️</div>
+      <div class="care-section-meta">
+        <div class="care-section-title">通風與空氣濕度</div>
+        ${cd.temperature?`<div class="care-section-sub">適溫 ${cd.temperature}</div>`:''}
+      </div>
+    </div>
+    <div class="care-section-body">
+      <div class="care-tip-row"><b>通風：</b><span>環境通風可防止病蟲害，應避免悶熱封閉的環境。</span></div>
+      <div class="care-tip-row"><b>濕度：</b><span>觀葉植物多喜高濕度，乾燥時可在植物周圍噴霧增加空氣濕度。</span></div>
+      ${tempNote}
+      ${plantNote(cd.ventilationHumidity)}
+    </div>
+  </div>`;
+
+  // ── 4. 施肥與土質 ────────────────────────────────────
+  const fertRows = [
+    cd.soil       ? `<div class="care-tip-row"><b>土壤：</b><span>${cd.soil}</span></div>` : '',
+    cd.fertilizer ? `<div class="care-tip-row"><b>施肥計畫：</b><span>${cd.fertilizer}</span></div>` : '',
+  ].join('');
+  const natFert = (cd.naturalFertilizer && cd.naturalFertilizer.length)
+    ? `<div class="care-tip-row" style="margin-top:4px"><b>自製天然肥料：</b><span></span></div>`
+      + cd.naturalFertilizer.map(s=>`<div class="care-tip-sub">· ${s}</div>`).join('') : '';
+  const s4 = `<div class="care-section">
+    <div class="care-section-header">
+      <div class="care-section-icon" style="background:#F0F9F4">🪴</div>
+      <div class="care-section-meta">
+        <div class="care-section-title">施肥與土質</div>
+        ${cd.soil?`<div class="care-section-sub">${cd.soil}</div>`:''}
+      </div>
+    </div>
+    <div class="care-section-body">
+      <div class="care-tip-row"><b>土壤選擇：</b><span>選擇透氣、排水良好的培養土。</span></div>
+      <div class="care-tip-row"><b>施肥時機：</b><span>生長期（春、夏季）追肥；開花期或休眠期暫停施肥。氮肥有助葉片生長。</span></div>
+      ${fertRows}${natFert}
+    </div>
+  </div>`;
+
+  // ── 5. 日常維護與檢查 ────────────────────────────────
+  const s5 = `<div class="care-section">
+    <div class="care-section-header">
+      <div class="care-section-icon" style="background:#F5F0FA">🔍</div>
+      <div class="care-section-meta">
+        <div class="care-section-title">日常維護與檢查</div>
+      </div>
+    </div>
+    <div class="care-section-body">
+      <div class="care-tip-row"><b>清潔：</b><span>用濕布輕拭葉片灰塵，幫助光合作用更有效率。</span></div>
+      <div class="care-tip-row"><b>修剪：</b><span>定期剪掉枯黃葉片，幫助植株集中養分於健康部位。</span></div>
+      <div class="care-tip-row"><b>病蟲害：</b><span>若葉片出現變色、捲曲等異狀，可能是病蟲害前兆，需立即檢查並處理。</span></div>
+      ${plantNote(cd.maintenance)}
+    </div>
+  </div>`;
+
+  document.getElementById('m-care-content').innerHTML = s1+s2+s3+s4+s5;
 }
 
 function renderProblemsTab(p){
@@ -1644,6 +3402,157 @@ function fetchCareBoxHTML(plantId){
   </div>`;
 }
 
+// ===== 頂層問題診斷 =====
+let diagPhotoB64 = null;
+
+function diagLoadPhoto(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    diagPhotoB64 = dataUrl.split(',')[1];
+    const preview = document.getElementById('diag-preview');
+    preview.src = dataUrl;
+    preview.style.display = 'block';
+    document.getElementById('diag-btn').style.display = 'block';
+    document.getElementById('diag-result').classList.add('hidden');
+    document.getElementById('diag-error').classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+// 支援拖放
+(function(){
+  const zone = document.getElementById('diag-zone');
+  if(!zone) return;
+  zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', ()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop', e=>{
+    e.preventDefault(); zone.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if(file){ const dt = new DataTransfer(); dt.items.add(file);
+      document.getElementById('diag-file').files = dt.files;
+      diagLoadPhoto(document.getElementById('diag-file')); }
+  });
+})();
+
+function diagReset(){
+  diagPhotoB64 = null;
+  document.getElementById('diag-preview').style.display = 'none';
+  document.getElementById('diag-btn').style.display = 'none';
+  document.getElementById('diag-result').classList.add('hidden');
+  document.getElementById('diag-error').classList.add('hidden');
+  document.getElementById('diag-file').value = '';
+}
+
+async function runDiagnose(){
+  if(!diagPhotoB64){ alert('請先選擇照片'); return; }
+  const apiKey = localStorage.getItem('gemini-api-key')||localStorage.getItem('apiKey')||'';
+  if(!apiKey){
+    document.getElementById('diag-error').textContent = '請先到「設定」頁面設定 Gemini API 金鑰。';
+    document.getElementById('diag-error').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('diag-btn').disabled = true;
+  document.getElementById('diag-loading').classList.remove('hidden');
+  document.getElementById('diag-error').classList.add('hidden');
+  document.getElementById('diag-result').classList.add('hidden');
+
+  const msgs = ['AI 正在辨識植物…','分析葉片狀況…','偵測病蟲害特徵…','整理診斷報告…'];
+  let mi = 0;
+  const iv = setInterval(()=>{ document.getElementById('diag-status').textContent = msgs[++mi%msgs.length]; }, 1800);
+
+  const langStr = lang==='en'?'English':lang==='vi'?'Vietnamese':'Traditional Chinese';
+  const prompt = `You are a plant pathology expert. Carefully examine this plant photo.
+Return ONLY a valid JSON object in ${langStr} with no markdown:
+{
+  "plantName": "植物中文名",
+  "plantLatin": "scientific name",
+  "plantEmoji": "single emoji representing this plant",
+  "confidence": "high or medium or low",
+  "overallHealth": "healthy or warning or critical",
+  "summary": "overall diagnosis in 1-2 sentences",
+  "problems": [
+    {
+      "name": "problem name",
+      "severity": "嚴重 or 注意 or 提示",
+      "symptoms": "what is visible in this photo",
+      "cause": "likely cause (pest, fungus, environment, etc.)",
+      "treatment": "specific treatment steps"
+    }
+  ]
+}
+Rules:
+- problems array can be empty [] if plant looks healthy
+- severity MUST be one of: 嚴重, 注意, 提示 (always use these Chinese values)
+- If no plant is detected at all: {"error":"no_plant"}`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+    const resp = await fetch(url, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{parts:[
+          {inline_data:{mime_type:'image/jpeg', data:diagPhotoB64}},
+          {text:prompt}
+        ]}],
+        generationConfig:{temperature:0.3, maxOutputTokens:1500}
+      })
+    });
+    clearInterval(iv);
+    document.getElementById('diag-loading').classList.add('hidden');
+    document.getElementById('diag-btn').disabled = false;
+    if(!resp.ok){ const e=await resp.json().catch(()=>({})); throw new Error(e?.error?.message||'API Error '+resp.status); }
+    const data = await resp.json();
+    const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const result = JSON.parse(raw);
+    if(result.error){ throw new Error('未偵測到植物，請換一張清晰的植物照片'); }
+    renderDiagnoseResult(result);
+  } catch(err){
+    clearInterval(iv);
+    document.getElementById('diag-loading').classList.add('hidden');
+    document.getElementById('diag-btn').disabled = false;
+    document.getElementById('diag-error').textContent = '診斷失敗：' + err.message;
+    document.getElementById('diag-error').classList.remove('hidden');
+  }
+}
+
+function renderDiagnoseResult(r){
+  document.getElementById('diag-emoji').textContent = r.plantEmoji || '🌿';
+  document.getElementById('diag-pname').textContent = r.plantName || '未知植物';
+  document.getElementById('diag-platin').textContent = r.plantLatin || '';
+  document.getElementById('diag-summary').textContent = r.summary || '';
+  const confMap = {high:'辨識度高', medium:'辨識度中', low:'辨識度低'};
+  document.getElementById('diag-conf').textContent = confMap[r.confidence] || r.confidence || '';
+
+  const problems = r.problems || [];
+  const sevColor = {嚴重:'var(--r400)', 注意:'var(--a400)', 提示:'var(--g400)'};
+  const sevBg    = {嚴重:'var(--r50)',  注意:'var(--a50)',  提示:'var(--g50)'};
+
+  if(!problems.length){
+    document.getElementById('diag-healthy').classList.remove('hidden');
+    document.getElementById('diag-problems-list').innerHTML = '';
+  } else {
+    document.getElementById('diag-healthy').classList.add('hidden');
+    document.getElementById('diag-problems-list').innerHTML = problems.map(pr=>`
+      <div style="background:var(--bg);border:.5px solid var(--bd);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:.75rem;border-left:3px solid ${sevColor[pr.severity]||'var(--g400)'}">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem">
+          <span style="font-size:13px;font-weight:700;color:var(--tx)">${pr.name}</span>
+          <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:${sevBg[pr.severity]||'var(--g50)'};color:${sevColor[pr.severity]||'var(--g400)'}">
+            ${pr.severity}
+          </span>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:.35rem"><b>症狀：</b>${pr.symptoms||''}</div>
+        <div style="font-size:12px;color:var(--tx2);margin-bottom:.35rem"><b>可能原因：</b>${pr.cause||''}</div>
+        <div style="font-size:12px;background:var(--g50);border-radius:var(--r);padding:.5rem .75rem;color:var(--g800);margin-top:.35rem"><b>🌱 處理方式：</b>${pr.treatment||''}</div>
+      </div>`).join('');
+  }
+
+  document.getElementById('diag-result').classList.remove('hidden');
+}
+
 async function fetchCareData(plantId){
   const p = plants.find(x=>x.id===plantId);
   if(!p) return;
@@ -1654,13 +3563,26 @@ async function fetchCareData(plantId){
   const langStr = lang==='en'?'English':lang==='vi'?'Vietnamese':'Traditional Chinese';
   const prompt = `You are a botanist expert. For the plant "${p.name}" (${p.latin||''}), return ONLY a JSON object (no markdown) in ${langStr}:
 {
+  "family": "plant family name in Chinese e.g. 天南星科",
+  "aliases": "common aliases separated by · e.g. 魔鬼藤·綠蘿",
+  "evergreen": "常綠 or 落葉 or 半落葉",
+  "flowerPeriod": "flowering season e.g. 春至夏季（3–6月）, or empty string",
+  "fruitPeriod": "fruiting season or empty string if not applicable",
+  "flowerFeature": "花朵外形、顏色、香氣等特徵（1-2句，若無明顯花朵填空字串）",
+  "leafFeature": "葉片形狀、顏色、質地、大小等特徵（1-2句）",
+  "fruitFeature": "果實形狀、顏色、大小等特徵（1-2句，若無果實填空字串）",
+  "uses": "主要用途，如觀賞、食用、藥用、淨化空氣、工業用等（1-2句）",
   "origin": "place of origin",
   "lifecycle": "annual/biennial/perennial etc",
   "plantSeason": "best planting season",
   "temperature": "ideal temperature range",
-  "soil": "soil requirements",
-  "fertilizer": "fertilizing schedule",
+  "soil": "soil type and requirements (1 sentence)",
+  "fertilizer": "fertilizing schedule (1 sentence)",
   "naturalFertilizer": ["tip 1 with specific material and usage","tip 2","tip 3"],
+  "wateringDetail": "specific watering tips for this plant (1-2 sentences): frequency, amount, special notes",
+  "lightDetail": "specific light & placement tips for this plant (1-2 sentences): ideal position, rotation advice",
+  "ventilationHumidity": "specific ventilation and humidity needs for this plant (1-2 sentences)",
+  "maintenance": "specific daily care tips for this plant (1-2 sentences): pruning, cleaning, pest prevention",
   "problems": [
     {"name":"problem name","severity":"嚴重 or 注意 or 提示","symptoms":"visible symptoms","treatment":"how to treat"},
     {"name":"problem name 2","severity":"...","symptoms":"...","treatment":"..."},
@@ -1679,7 +3601,7 @@ Severity must be one of: 嚴重, 注意, 提示 (use these exact Chinese values 
   try {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
     const resp = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:1200}})});
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.3,maxOutputTokens:2000}})});
     if(!resp.ok) throw new Error('API Error '+resp.status);
     const data = await resp.json();
     const raw = (data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
@@ -1689,6 +3611,7 @@ Severity must be one of: 嚴重, 注意, 提示 (use these exact Chinese values 
     renderCareTab(p);
     renderProblemsTab(p);
     renderCalendarTab(p);
+    renderMorphTab(p); // 重繪別名 + 形態 + 用途
     // Re-render basic grid with new origin/lifecycle data
     const basicCells = [
       ['原產地', cd.origin||'—'],['植物類別', p.category||'—'],
@@ -1735,6 +3658,123 @@ function initSettings(){
   const saved = localStorage.getItem('gemini-api-key') || localStorage.getItem('apiKey') || '';
   const input = document.getElementById('settings-api-input');
   if(input) input.value = saved;
+  // Map image preview
+  updateMapImagePreview();
+  // Zones textarea
+  const ta = document.getElementById('zones-textarea');
+  if(ta) ta.value = campusZones.join('\n');
+  // Export count
+  const ec = document.getElementById('export-count');
+  if(ec) ec.textContent = plants.length;
+  // GitHub settings
+  const ghOwner = document.getElementById('gh-owner');
+  const ghRepo  = document.getElementById('gh-repo');
+  const ghToken = document.getElementById('gh-token');
+  if(ghOwner) ghOwner.value = localStorage.getItem('gh-owner') || '';
+  if(ghRepo)  ghRepo.value  = localStorage.getItem('gh-repo')  || '';
+  if(ghToken) ghToken.value = localStorage.getItem('gh-token') ? '••••••••' : '';
+}
+
+function saveGitHubSettings(){
+  const owner = document.getElementById('gh-owner')?.value.trim();
+  const repo  = document.getElementById('gh-repo')?.value.trim();
+  const tokenVal = document.getElementById('gh-token')?.value.trim();
+  if(owner) localStorage.setItem('gh-owner', owner);
+  if(repo)  localStorage.setItem('gh-repo',  repo);
+  // 只在非遮罩狀態時儲存 token
+  if(tokenVal && tokenVal !== '••••••••') localStorage.setItem('gh-token', tokenVal);
+  showToast('✅ GitHub 設定已儲存');
+  setGhStatus('', '');
+}
+
+// 把字串轉成 GitHub API 需要的 Base64（支援中文）
+function encodeBase64Unicode(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
+async function publishToGitHub(){
+  const owner = localStorage.getItem('gh-owner');
+  const repo  = localStorage.getItem('gh-repo');
+  const token = localStorage.getItem('gh-token');
+
+  if(!owner || !repo || !token){
+    setGhStatus('err', '❌ 請先填寫帳號、Repo 名稱和 Token，並按「儲存設定」');
+    return;
+  }
+
+  const btn = document.getElementById('gh-sync-btn');
+  if(btn) btn.disabled = true;
+  setGhStatus('loading', '⏳ 同步中，請稍候…');
+
+  try {
+    // 1. 組成要上傳的 JSON 資料
+    const data = {
+      version: 1,
+      exportDate: new Date().toISOString().slice(0,10),
+      plantCount: plants.length,
+      plants: plants,
+      mapImg: localStorage.getItem('campus-map-img') || '',
+      zones: campusZones
+    };
+    const jsonStr = JSON.stringify(data, null, 2);
+    const encoded = encodeBase64Unicode(jsonStr);
+
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/campus-plant-data.json`;
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'Content-Type': 'application/json'
+    };
+
+    // 2. 取得現有檔案的 SHA（更新時必須提供）
+    let sha;
+    const getResp = await fetch(apiUrl, { headers });
+    if(getResp.ok){
+      const existing = await getResp.json();
+      sha = existing.sha;
+    } else if(getResp.status !== 404){
+      const e = await getResp.json().catch(()=>({}));
+      throw new Error(e.message || `GET 失敗 ${getResp.status}`);
+    }
+
+    // 3. 上傳（新建或更新）
+    const body = {
+      message: `🌿 更新植物資料 ${data.exportDate}（共 ${plants.length} 株）`,
+      content: encoded
+    };
+    if(sha) body.sha = sha;
+
+    const putResp = await fetch(apiUrl, {
+      method: 'PUT', headers, body: JSON.stringify(body)
+    });
+    if(!putResp.ok){
+      const e = await putResp.json().catch(()=>({}));
+      throw new Error(e.message || `PUT 失敗 ${putResp.status}`);
+    }
+
+    const siteUrl = `https://${owner}.github.io/${repo}/`;
+    setGhStatus('ok',
+      `✅ 同步成功！共 ${plants.length} 株植物。<br>` +
+      `約 30 秒後 <a href="${siteUrl}" target="_blank">🔗 ${siteUrl}</a> 將更新。`
+    );
+    showToast(`🚀 已同步 ${plants.length} 株植物到 GitHub Pages！`);
+
+  } catch(err){
+    setGhStatus('err', `❌ 同步失敗：${err.message}`);
+  } finally {
+    if(btn) btn.disabled = false;
+  }
+}
+
+function setGhStatus(type, html){
+  const el = document.getElementById('gh-status');
+  if(!el) return;
+  el.className = 'gh-status' + (type ? ' '+type : '');
+  el.innerHTML = html;
 }
 function saveApiKey(){
   const val = document.getElementById('settings-api-input').value.trim();
@@ -1755,6 +3795,14 @@ function clearAllData(){
   huntFound = {};
   renderAll();
   showTab('map');
+}
+function clearMapAndZones(){
+  localStorage.removeItem('campus-map-img');
+  localStorage.removeItem('campus-zones');
+  mapImg = null;
+  campusZones = [...DEFAULT_ZONES];
+  updateZoneSelect();
+  if(canvas){ canvas.height = Math.round(canvas.width*0.6); renderMap(); }
 }
 
 // ===== RENDER ALL =====
@@ -1783,13 +3831,53 @@ function loadSampleData(){
   savePlants();
 }
 
+// ===== 嘗試載入共享展示資料（GitHub Pages 部署用）=====
+async function tryLoadSharedData(){
+  try {
+    const resp = await fetch('./campus-plant-data.json', {cache:'no-cache'});
+    if(!resp.ok) return false;
+    const data = await resp.json();
+    if(!data.plants || !Array.isArray(data.plants)) return false;
+    plants = data.plants;
+    isReadOnlyMode = true;
+    if(data.mapImg){
+      localStorage.setItem('campus-map-img', data.mapImg);
+    }
+    if(data.zones && Array.isArray(data.zones)){
+      campusZones = data.zones;
+    }
+    return true;
+  } catch(e){ return false; }
+}
+
+// ===== 匯出共享資料（老師按此按鈕，把 JSON 上傳到 GitHub）=====
+function exportSharedData(){
+  const data = {
+    version: 1,
+    exportDate: new Date().toISOString().slice(0,10),
+    plantCount: plants.length,
+    plants: plants,
+    mapImg: localStorage.getItem('campus-map-img') || '',
+    zones: campusZones
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'campus-plant-data.json';
+  a.click();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 3000);
+  showToast(`✅ 已匯出 ${plants.length} 株植物資料！請將此檔上傳到 GitHub。`);
+}
+
 // ===== INIT =====
-window.addEventListener('load', ()=>{
-  loadSampleData();
+window.addEventListener('load', async ()=>{
+  const fromShared = await tryLoadSharedData();
+  if(!fromShared) loadSampleData();
   applyI18n();
   initCanvas();
   renderMap();
   updateCategoryDropdowns();
+  if(isReadOnlyMode) applyReadOnlyMode();
 });
 window.addEventListener('resize', ()=>{
   if(canvas){
@@ -1799,6 +3887,30 @@ window.addEventListener('resize', ()=>{
     renderMap();
   }
 });
+
+// ===== MOBILE TOUCH FIX =====
+// 手機 Chrome 在可滑動容器內會吃掉 click 事件，改用 touchend 直接觸發
+(function(){
+  let _startX = 0, _startY = 0, _moved = false;
+  document.addEventListener('touchstart', e=>{
+    _startX = e.touches[0].clientX;
+    _startY = e.touches[0].clientY;
+    _moved = false;
+  }, {passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(Math.abs(e.touches[0].clientX-_startX)>8 || Math.abs(e.touches[0].clientY-_startY)>8)
+      _moved = true;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(_moved) return; // 是滑動，不是輕觸
+    const el = e.target.closest('[onclick], button, select, input, a, label');
+    if(!el) return;
+    if(el.tagName==='SELECT'||el.tagName==='INPUT'||el.tagName==='TEXTAREA') return;
+    if(el.id==='map-canvas') return; // canvas 有自己的 touchend
+    e.preventDefault();
+    el.click();
+  }, {passive:false});
+})();
 
 // ===== PWA SERVICE WORKER =====
 if('serviceWorker' in navigator){
