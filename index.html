@@ -3695,6 +3695,42 @@ function encodeBase64Unicode(str){
   return btoa(bin);
 }
 
+// 產生帶時間戳版本號的 sw.js（確保每次同步後舊快取被清除）
+function generateSwJs(ts){
+  return `// Service Worker — Campus Plant Map (build ${ts})
+const CACHE = 'plant-map-${ts}';
+const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
+self.addEventListener('install', e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e=>{
+  e.waitUntil(caches.keys().then(keys=>
+    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e=>{
+  if(e.request.url.includes('campus-plant-data.json')){
+    e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.match(e.request)));
+    return;
+  }
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+});`;
+}
+
+// 通用：上傳單一檔案到 GitHub（自動取得 SHA 以支援更新）
+async function uploadFileToGitHub(owner, repo, path, headers, content, message){
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  let sha;
+  const g = await fetch(url, {headers});
+  if(g.ok) sha = (await g.json()).sha;
+  const body = {message, content: encodeBase64Unicode(content)};
+  if(sha) body.sha = sha;
+  const r = await fetch(url, {method:'PUT', headers, body:JSON.stringify(body)});
+  if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.message||path+' 上傳失敗'); }
+}
+
 async function publishToGitHub(){
   const owner = localStorage.getItem('gh-owner');
   const repo  = localStorage.getItem('gh-repo');
@@ -3741,7 +3777,7 @@ async function publishToGitHub(){
       throw new Error(e.message || `GET 失敗 ${getResp.status}`);
     }
 
-    // 3. 上傳（新建或更新）
+    // 3. 上傳 campus-plant-data.json
     const body = {
       message: `🌿 更新植物資料 ${data.exportDate}（共 ${plants.length} 株）`,
       content: encoded
@@ -3755,6 +3791,12 @@ async function publishToGitHub(){
       const e = await putResp.json().catch(()=>({}));
       throw new Error(e.message || `PUT 失敗 ${putResp.status}`);
     }
+
+    // 4. 同步更新 sw.js（版本號含時間戳，強制所有裝置清除舊快取）
+    await uploadFileToGitHub(owner, repo, 'sw.js', headers,
+      generateSwJs(Date.now()),
+      `🔄 更新 SW 快取版本 ${data.exportDate}`
+    );
 
     const siteUrl = `https://${owner}.github.io/${repo}/`;
     setGhStatus('ok',
