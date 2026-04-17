@@ -1330,6 +1330,7 @@ let lastTapTime = 0; // 觸控雙擊偵測
 let activeZone = null;      // 目前聚焦的分區名稱（null = 全校總覽）
 let zoneBadgeHits = [];     // [{name, cx, cy, hw, hh}] canvas 像素座標
 let clusterHits = [];       // [{cx, cy, r, pins}] canvas 像素座標
+let spreadPinHits = [];     // [{wx, wy, plantId}] 爆炸展開後各 pin 的螢幕位置
 
 // 限制平移範圍，不超出地圖邊界
 function clampPan(px, py){
@@ -1698,17 +1699,24 @@ function handleMapClick(x, y){
       }
     }
   } else {
-    // Pin / Cluster 模式
-    // 1. 先檢查 cluster
+    // Pin / 爆炸展開模式
+    const hitR = 36 / mapZoom;
+    // 1. 先檢查展開後的 pin（spread positions）
+    for(const sp of spreadPinHits){
+      const dx=clickX-sp.wx, dy=clickY-sp.wy;
+      if(Math.sqrt(dx*dx+dy*dy) <= hitR){
+        showPlantDetail(sp.plantId); return;
+      }
+    }
+    // 2. 大型群組的聚合泡泡（>12株）
     for(const cl of clusterHits){
       const dx=clickX-cl.cx, dy=clickY-cl.cy;
       if(Math.sqrt(dx*dx+dy*dy) <= cl.r){
-        // 放大到 cluster 中心
         const newZoom = Math.min(4, mapZoom*2);
         animateZoomTo(newZoom, cl.cx, cl.cy); return;
       }
     }
-    // 2. 再檢查個別 pin
+    // 3. 一般 pin（未被聚合的單株）
     const p = findMarkerAt(x, y);
     if(p){ showPlantDetail(p.id); return; }
   }
@@ -1851,7 +1859,7 @@ function renderMap(){
   const useRealMap = (mapImg && mapImg.complete && mapImg.naturalWidth > 0);
 
   // 重置 hit areas（每次 render 重新計算）
-  zoneBadgeHits = []; clusterHits = [];
+  zoneBadgeHits = []; clusterHits = []; spreadPinHits = [];
 
   // ─── 繪製單一 Pin ───
   function drawPin(px, py, color, emoji, label, isExtra){
@@ -2001,7 +2009,90 @@ function renderMap(){
     }
 
   } else {
-    // ══ 模式 B：個別 Pin + 聚合泡泡 ══
+    // ══ 模式 B：個別 Pin + 爆炸展開（多株重疊時）══
+
+    // ── 爆炸展開群組（錨點 + 格狀排列 + 虛線）──
+    function drawExplodedCluster(grp){
+      const N = grp.length;
+      // 單株：正常繪製
+      if(N === 1){
+        const {wx,wy,plant,isExtra}=grp[0];
+        const sx=wx, sy=wy;
+        drawPin(sx, sy, catColor(plant.category), plant.emoji, plant.name, isExtra);
+        spreadPinHits.push({wx:sx, wy:sy, plantId:plant.id});
+        return;
+      }
+      // 超過 12 株：改用聚合泡泡（避免展開太大）
+      if(N > 12){
+        const cx2=grp.reduce((s,p)=>s+p.wx,0)/N;
+        const cy2=grp.reduce((s,p)=>s+p.wy,0)/N;
+        const colors=grp.map(p=>catColor(p.plant.category));
+        const r=drawCluster(cx2,cy2,N,colors);
+        clusterHits.push({cx:cx2,cy:cy2,r:r+6,pins:grp});
+        return;
+      }
+
+      // 計算錨點重心
+      const anchorX = grp.reduce((s,p)=>s+p.wx,0)/N;
+      const anchorY = grp.reduce((s,p)=>s+p.wy,0)/N;
+
+      // 格狀佈局（最多 3 欄）
+      const cols = N <= 2 ? 2 : N <= 4 ? 2 : 3;
+      const rows = Math.ceil(N / cols);
+      // 每格大小（螢幕像素 → 世界像素）
+      const cw = 52 / mapZoom;
+      const ch = 62 / mapZoom;
+      const gridW = cols * cw;
+      const gridH = rows * ch;
+
+      // 決定展開方向（預設往右；貼邊則往左）
+      let offX = 18 / mapZoom;
+      if(anchorX + offX + gridW > w * 0.9) offX = -(18/mapZoom) - gridW;
+      // 垂直置中
+      let startX = anchorX + offX;
+      let startY = anchorY - gridH / 2;
+      // 邊界保護
+      if(startY < h * 0.02) startY = h * 0.02;
+      if(startY + gridH > h * 0.98) startY = h * 0.98 - gridH;
+
+      // 先畫所有虛線（在 pin 下層）
+      grp.forEach((item, i)=>{
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const sx = startX + (col + 0.5) * cw;
+        const sy = startY + row * ch + 16/mapZoom; // pin 頂端
+        ctx.save();
+        ctx.setLineDash([3/mapZoom, 3/mapZoom]);
+        ctx.strokeStyle = 'rgba(60,60,60,0.3)';
+        ctx.lineWidth = 1/mapZoom;
+        ctx.beginPath();
+        ctx.moveTo(anchorX, anchorY);
+        ctx.lineTo(sx, sy);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      });
+
+      // 錨點小圓點
+      ctx.beginPath();
+      ctx.arc(anchorX, anchorY, 5/mapZoom, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(80,80,80,0.5)';
+      ctx.lineWidth = 1/mapZoom;
+      ctx.stroke();
+
+      // 再畫各個 pin（在虛線上層）
+      grp.forEach((item, i)=>{
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const sx = startX + (col + 0.5) * cw;
+        const sy = startY + (row + 0.5) * ch;
+        drawPin(sx, sy, catColor(item.plant.category), item.plant.emoji, item.plant.name, item.isExtra);
+        spreadPinHits.push({wx:sx, wy:sy, plantId:item.plant.id});
+      });
+    }
+
     const allPins = [];
     visPlants.forEach(p=>{
       if(p.mapX!=null) allPins.push({wx:p.mapX/100*w, wy:p.mapY/100*h, plant:p, isExtra:false});
@@ -2010,18 +2101,7 @@ function renderMap(){
       });
     });
     const clusters = clusterPins(allPins);
-    clusters.forEach(grp=>{
-      if(grp.length === 1){
-        const {wx,wy,plant,isExtra}=grp[0];
-        drawPin(wx, wy, catColor(plant.category), plant.emoji, plant.name, isExtra);
-      } else {
-        const cx2 = grp.reduce((s,p)=>s+p.wx,0)/grp.length;
-        const cy2 = grp.reduce((s,p)=>s+p.wy,0)/grp.length;
-        const colors = grp.map(p=>catColor(p.plant.category));
-        const r = drawCluster(cx2, cy2, grp.length, colors);
-        clusterHits.push({cx:cx2, cy:cy2, r:r+6, pins:grp});
-      }
-    });
+    clusters.forEach(grp=> drawExplodedCluster(grp));
   }
 
   ctx.textAlign = 'left';
