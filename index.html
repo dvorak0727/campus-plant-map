@@ -1425,9 +1425,12 @@ function zoomToZone(zoneName){
   animateZoomTo(newZoom, cx, cy);
 }
 
-// 將所有 pins 依螢幕距離聚合（回傳 clusters 陣列）
+// 將所有 pins 依「世界座標距離」聚合（回傳 clusters 陣列）
+// THRESH 為世界像素（canvas CSS px），與 zoom 無關；
+// pin 半徑 ~15 世界px，兩 pin 重疊條件：距離 < 2×15 = 30，
+// 取 40 讓稍微分開但仍接近的也一起展開
 function clusterPins(allPins){
-  const THRESH = 40; // 螢幕像素
+  const THRESH = 40; // 世界像素（canvas CSS px）
   const used = new Set();
   const clusters = [];
   for(let i=0; i<allPins.length; i++){
@@ -1437,7 +1440,7 @@ function clusterPins(allPins){
       if(used.has(j)) continue;
       const dx = allPins[i].wx - allPins[j].wx;
       const dy = allPins[i].wy - allPins[j].wy;
-      if(Math.sqrt(dx*dx+dy*dy)*mapZoom < THRESH){ grp.push(allPins[j]); used.add(j); }
+      if(Math.sqrt(dx*dx+dy*dy) < THRESH){ grp.push(allPins[j]); used.add(j); }
     }
     clusters.push(grp);
   }
@@ -2039,15 +2042,17 @@ function renderMap(){
       // 格狀佈局（最多 3 欄）
       const cols = N <= 2 ? 2 : N <= 4 ? 2 : 3;
       const rows = Math.ceil(N / cols);
-      // 每格大小（螢幕像素 → 世界像素）
-      const cw = 52 / mapZoom;
-      const ch = 62 / mapZoom;
+      // 每格大小：用世界像素固定值，不隨 zoom 縮小
+      // pinR = 15 world px；cw 至少 2×pinR+10 = 40，ch 至少 pinR×2+22（留 label 空間）
+      const pinRW = useRealMap ? 15 : 13;
+      const cw = Math.max(52 / mapZoom, pinRW * 2 + 12); // ≥ 42 world px
+      const ch = Math.max(64 / mapZoom, pinRW * 2 + 24); // ≥ 54 world px
       const gridW = cols * cw;
       const gridH = rows * ch;
 
       // 決定展開方向（預設往右；貼邊則往左）
-      let offX = 18 / mapZoom;
-      if(anchorX + offX + gridW > w * 0.9) offX = -(18/mapZoom) - gridW;
+      let offX = Math.max(18 / mapZoom, pinRW * 1.2);
+      if(anchorX + offX + gridW > w * 0.9) offX = -Math.max(18/mapZoom, pinRW*1.2) - gridW;
       // 垂直置中
       let startX = anchorX + offX;
       let startY = anchorY - gridH / 2;
