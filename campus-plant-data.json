@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exportDate": "2026-04-16",
+  "exportDate": "2026-04-17",
   "plantCount": 13,
   "plants": [
     {
@@ -996,8 +996,8 @@
       "sun": "薑荷花喜歡充足的陽光，但也能容忍部分遮蔭。",
       "water": "需要保持土壤濕潤，尤其在生長季節。",
       "hint": "",
-      "mapX": null,
-      "mapY": null,
+      "mapX": 79,
+      "mapY": 51,
       "addedDate": "2026-04-16",
       "careData": {
         "family": "薑科",
@@ -1094,8 +1094,8 @@
       "sun": "適合半陰環境，避免陽光直射，否則葉片容易灼傷。",
       "water": "保持盆土濕潤，但避免積水，夏季可增加澆水頻率。",
       "hint": "",
-      "mapX": null,
-      "mapY": null,
+      "mapX": 75,
+      "mapY": 53,
       "addedDate": "2026-04-16",
       "careData": {
         "family": "天南星科",
@@ -1192,8 +1192,8 @@
       "sun": "適合半陰環境，避免陽光直射，否則葉片容易曬傷。",
       "water": "保持土壤濕潤，但避免積水，約每週澆水一次。",
       "hint": "",
-      "mapX": null,
-      "mapY": null,
+      "mapX": 77,
+      "mapY": 50,
       "addedDate": "2026-04-16",
       "careData": {
         "family": "天南星科",
