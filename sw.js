@@ -1,5 +1,5 @@
-// Service Worker — Campus Plant Map (build 1776738804947)
-const CACHE = 'plant-map-1776738804947';
+// Service Worker — Campus Plant Map (build 1776740387973)
+const CACHE = 'plant-map-1776740387973';
 const ASSETS = ['./','./index.html','./manifest.json','./icon.svg'];
 self.addEventListener('install', e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).catch(()=>{}));
